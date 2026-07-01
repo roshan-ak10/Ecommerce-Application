@@ -34,13 +34,14 @@ function Login({ setAuthUser }) {
     try {
       if (isLogin) {
         // --- LOGIN LOGIC ---
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}api/users/login`, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, {
           email: formData.email,
           password: formData.password
         }, axiosConfig); 
         
         localStorage.setItem('userName', response.data.name);
-        localStorage.setItem('userEmail', response.data.email);        if (setAuthUser) setAuthUser(response.data.name); 
+        localStorage.setItem('userEmail', response.data.email);        
+        if (setAuthUser) setAuthUser(response.data.name); 
         
         navigate('/'); 
         
