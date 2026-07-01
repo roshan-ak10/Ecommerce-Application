@@ -1,0 +1,6 @@
+{
+  "env": {
+    "NODEMON_ENV_LOADER": "false"
+  },
+  "verbose": false
+}
