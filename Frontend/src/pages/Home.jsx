@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import Categories from '../categories'; 
+import { useCart } from '../context/CartContext';
 
-// Dummy data for our slideshow
+// Helper function to generate a stable fake rating based on Product ID
+const getStableNumber = (id = "", min, max) => {
+  let sum = 0;
+  for (let i = 0; i < id.length; i++) {
+    sum += id.charCodeAt(i);
+  }
+  const randomFrac = (Math.sin(sum) + 1) / 2; 
+  return (randomFrac * (max - min) + min);
+};
+
 const bannerDeals = [
   {
     id: 1,
@@ -27,21 +38,17 @@ const bannerDeals = [
 function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // State for the Banner Slideshow
+
+  const { addToCart } = useCart();
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Auto-play the slideshow (Changes slide every 5 seconds)
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev === bannerDeals.length - 1 ? 0 : prev + 1));
     }, 5000);
-
-    // Cleanup interval on component unmount so it doesn't run endlessly in the background
     return () => clearInterval(slideInterval);
   }, []);
 
-  // Fetch Products from Backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -56,25 +63,20 @@ function Home() {
     fetchProducts();
   }, []);
 
-  // Manual Slider Controls
   const nextSlide = () => setCurrentSlide(currentSlide === bannerDeals.length - 1 ? 0 : currentSlide + 1);
   const prevSlide = () => setCurrentSlide(currentSlide === 0 ? bannerDeals.length - 1 : currentSlide - 1);
 
   return (
     <div style={{ marginTop: '20px' }}>
-      
-      {/* --- HERO BANNER / SLIDESHOW --- */}
-      <section className="banner-container">
-        
-        {/* Left/Right Buttons */}
-        <button className="banner-btn left" onClick={prevSlide}>
-          <FiChevronLeft />
-        </button>
-        <button className="banner-btn right" onClick={nextSlide}>
-          <FiChevronRight />
-        </button>
 
-        {/* The Slides */}
+      <div className="sticky-categories-wrapper">
+        <Categories />
+      </div>
+      
+      <section className="banner-container">
+        <button className="banner-btn left" onClick={prevSlide}><FiChevronLeft /></button>
+        <button className="banner-btn right" onClick={nextSlide}><FiChevronRight /></button>
+
         {bannerDeals.map((deal, index) => (
           <div 
             key={deal.id} 
@@ -89,55 +91,67 @@ function Home() {
           </div>
         ))}
 
-        {/* Indicator Dots at the bottom */}
         <div className="banner-dots">
           {bannerDeals.map((_, index) => (
-            <div 
-              key={index} 
-              className={`dot ${index === currentSlide ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(index)}
-            ></div>
+            <div key={index} className={`dot ${index === currentSlide ? 'active' : ''}`} onClick={() => setCurrentSlide(index)}></div>
           ))}
         </div>
       </section>
 
-      {/* --- PRODUCT GRID --- */}
-      <section>
+      <section style={{ padding: '0 20px' }}>
         <h2>Featured Products</h2>
         
         {loading ? (
           <p style={{ marginTop: '15px' }}>Loading products...</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginTop: '15px' }}>
+          /* REMOVED INLINE STYLES SO product-grid-4 CLASS CAN CONTROL THE LAYOUT */
+          <div className="product-grid-4">
             
+            {products.map((product) => {
+              const fakeOriginalPrice = Math.floor(product.price * 1.3);
+              const fakeRating = getStableNumber(product._id || product.name, 3.5, 4.9).toFixed(1); 
+              const fakeReviews = Math.floor(getStableNumber(product._id || product.name, 100, 5000));
 
-            
-            {products.map((product) => (
-              <div key={product._id} className="card">
-                
-                {/* --- NEW DYNAMIC IMAGE BLOCK --- */}
-                <div style={{ height: '200px', overflow: 'hidden', marginBottom: '15px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                  />
+              return (
+                <div key={product._id} className="product-outer-wrapper">
+                  <div className="product-image-box">
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  
+                  <div className="product-info-outside">
+                    <div className="product-title-row">
+                      <strong>{product.brand || "Brand"}</strong>
+                      {product.name}
+                    </div>
+
+                    <div className="rating-text">
+                       <span style={{ backgroundColor: '#388e3c', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                         {fakeRating} ★
+                       </span>
+                       <span style={{ color: '#878787', fontSize: '13px' }}>({fakeReviews.toLocaleString('en-IN')})</span>
+                    </div>
+                    
+                    <div className="product-price-row">
+                      <span className="price-original">₹{fakeOriginalPrice.toLocaleString('en-IN')}</span>
+                      <span className="price-current">₹{product.price.toLocaleString('en-IN')}</span>
+                    </div>
+                    
+                    {product.quantity > 0 ? (
+                      <button className="add-to-cart-modern" onClick={() => addToCart(product)}>
+                        Add to Cart
+                      </button>
+                    ) : (
+                      <button className="add-to-cart-modern" disabled>
+                        Out of Stock
+                      </button>
+                    )} 
+                  </div>
                 </div>
-                
-                <h4>{product.name}</h4>
-                <p style={{ color: 'var(--text-muted)' }}>{product.brand}</p>
-                <h3 style={{ margin: '10px 0', color: 'var(--text-main)' }}>₹{product.price.toLocaleString('en-IN')}</h3>
-                {product.quantity > 0 ? (
-                  <button className="btn-primary">Add to Cart</button>
-                ) : (
-                  <button className="btn-disabled" disabled>Out of Stock</button>
-                )} 
-             </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
-
     </div>
   );
 }

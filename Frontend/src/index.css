@@ -10,6 +10,7 @@
 }
 
 [data-theme='dark'] {
+  --bg-color: #121212;
   --bg-main: #0f0000;
   --bg-card: #1f0505;
   --primary-red: #e50914;
@@ -26,12 +27,15 @@
   padding: 0;
 }
 
+button, .navbar, .card {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-main);
   color: var(--text-main);
   line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* --- 3. Layout & Cards --- */
@@ -43,9 +47,7 @@ body {
 
 .card {
   background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
 }
 
@@ -64,6 +66,7 @@ body {
   font-weight: bold;
   transition: background-color 0.2s ease;
   width: 100%;
+  margin-bottom: 10px;
 }
 
 .btn-primary:hover {
@@ -109,6 +112,7 @@ body {
   font-weight: bold;
   transition: all 0.3s ease;
 }
+
 
 /* --- 5. Search Bar & Icons --- */
 .search-container {
@@ -415,4 +419,270 @@ body {
 .dot.active {
   background-color: var(--primary-red);
   transform: scale(1.2);
+}
+
+/* --- MODERN PRODUCT CARD --- */
+.product-card-modern {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden; /* Keeps the image inside the rounded corners */
+  transition: box-shadow 0.2s ease;
+  height: 100%;
+  position: relative;
+}
+
+.product-card-modern:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Replace your current image container CSS with this */
+
+.product-image-container {
+  position: relative;
+  height: 250px; /* Slightly taller looks better for edge-to-edge */
+  width: 100%;
+  background-color: #f9f9f9;
+  /* Removed padding so it goes all the way to the edges! */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; 
+}
+
+.product-image-container img {
+  width: 100%;
+  height: 100%;
+  /* 'cover' forces the image to fill the entire box without stretching */
+  object-fit: cover; 
+  /* 'object-position' centers the most important part of the image */
+  object-position: center; 
+}
+
+.rating-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #212121;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+/* Keep badge readable in dark mode */
+[data-theme='dark'] .rating-badge {
+  background-color: rgba(30, 30, 30, 0.95);
+  color: #f0f0f0;
+}
+
+/* Product Info Section */
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.product-title-row {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  /* This truncates long text with an ellipsis (...) */
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-title-row strong {
+  color: var(--text-main);
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.product-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.price-original {
+  text-decoration: line-through;
+  color: #878787;
+  font-size: 14px;
+}
+
+.price-current {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Stylish Add to Cart Button */
+.add-to-cart-modern {
+  margin-top: auto;
+  width: 100%;
+  padding: 10px;
+  background-color: #ff9f00; /* Flipkart Orange/Yellow */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-to-cart-modern:hover {
+  background-color: #f39800;
+}
+
+.add-to-cart-modern:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+
+/* --- NEW "DETAILS OUTSIDE" LAYOUT --- */
+.product-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Enforces 4 columns */
+  margin: 60px;
+  justify-content:space-around;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) { .product-grid-4 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) { .product-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .product-grid-4 { grid-template-columns: 1fr; } }
+
+.product-outer-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Space between image and details */
+  height: 100%;
+}
+
+/* The Image acts as the only "card" now */
+.product-image-box {
+  position: relative;
+  height: 350px; /* INCREASED HEIGHT */
+  width: 100%;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color); 
+}
+
+.product-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.product-image-box:hover img {
+  transform: scale(1.04); /* Slight zoom effect on hover */
+}
+
+/* Text and Buttons placed outside */
+.product-info-outside {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 0 4px; 
+}
+
+.product-title-row {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Allow 2 lines for title outside */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-title-row strong {
+  color: var(--text-main);
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+/* Rating badge moved to standard text outside */
+.rating-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.product-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.price-original {
+  text-decoration: line-through;
+  color: #878787;
+  font-size: 14px;
+}
+
+.price-current {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.add-to-cart-modern {
+  margin-top: auto;
+  width: 100%;
+  padding: 10px;
+  background-color: #ff9f00; 
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-to-cart-modern:hover {
+  background-color: #f39800;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--bg-color, #ffffff); /* Ensure it's not transparent */
+}
+
+.fk-categories-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 30px; /* Adjust gap to keep them centered and tight */
+}
+
+.fk-category-item {
+  padding: 5px 10px; /* Reduced vertical padding */
+  font-size: 12px;
 }

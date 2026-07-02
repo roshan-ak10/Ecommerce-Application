@@ -9,6 +9,9 @@ import Login from './pages/Login';
 import Help from './pages/Help';
 import './index.css';
 import Admin from './pages/Admin';
+import Cart from './pages/Cart';
+import Navbar from './Navbar';
+import SearchResults from './pages/SearchResults';
 
 function AppLayout() {
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
@@ -16,7 +19,6 @@ function AppLayout() {
   const [expandedSection, setExpandedSection] = useState(null);
   
   // --- AUTHENTICATION STATE ---
-  // This checks if a user is currently logged in by checking local storage
   const [authUser, setAuthUser] = useState(localStorage.getItem('userName')); 
   
   const navigate = useNavigate();
@@ -39,67 +41,28 @@ function AppLayout() {
     navigate(path);
   };
 
- const handleLogout = async () => {
-  try {
-    await axios.post(`${import.meta.env.VITE_API_URL}/api/users/logout`, {}, { withCredentials: true });
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userEmail'); // ADD THIS
-    setAuthUser(null);
-    setIsMenuOpen(false);
-    navigate('/');
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/users/logout`, {}, { withCredentials: true });
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      setAuthUser(null);
+      setIsMenuOpen(false);
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <div className="app-container">
       
-      {/* 1. TOP NAVIGATION BAR */}
-      <nav className="navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button className="icon-btn" onClick={() => setIsMenuOpen(true)}>
-            <FiMenu />
-          </button>
-          <div className="logo" style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-red)' }}>
-            RedKart
-          </div>
-        </div>
-
-        <div className="search-container">
-          <input type="text" className="search-input" placeholder="Search for products, brands and more..." />
-          <button className="search-btn"><FiSearch size={20} /></button>
-        </div>
+      <Navbar 
+        setIsMenuOpen={setIsMenuOpen} 
+        theme={theme} 
+        toggleTheme={toggleTheme}
+      />
         
-        <ul className="nav-links">
-          <li><Link to="/" className="nav-link">Shop</Link></li>
-          <li><Link to="/wishlist" className="nav-link">Wishlist</Link></li>
-          <li><Link to="/profile" className="nav-link">Profile</Link></li>
-          
-          {/* --- NAVBAR LOGIN/LOGOUT BUTTON --- */}
-          {authUser ? (
-            <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <span style={{ color: 'var(--primary-red)', fontWeight: 'bold' }}>Hi, {authUser.split(' ')[0]}</span>
-              <button onClick={handleLogout} className="btn-primary" style={{ padding: '8px 15px', width: 'auto', backgroundColor: 'transparent', border: '1px solid var(--primary-red)', color: 'var(--primary-red)' }}>
-                Logout
-              </button>
-            </li>
-          ) : (
-            <li>
-              <Link to="/login" className="btn-primary" style={{ textDecoration: 'none', padding: '10px 15px', display: 'inline-block' }}>
-                Login / Sign Up
-              </Link>
-            </li>
-          )}
-
-          <li>
-            <button onClick={toggleTheme} className="theme-toggle-btn">
-              {theme === 'light' ? '🌙' : '☀️'}
-            </button>
-          </li>
-        </ul>
-      </nav>
-
       {/* 2. SLIDE-OUT MENU */}
       <div className={`overlay ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(false)}></div>
       
@@ -152,25 +115,25 @@ function AppLayout() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/search" element={<SearchResults />} />
           
-          {/* We pass setAuthUser down to Login so it can instantly update the UI when someone logs in */}
           <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
-          <Route 
-  path="/admin" 
-  element={
-    ['roshankrishnaraj10@gmail.com', 'varshiniilango08@gmail.com'].includes(localStorage.getItem('userEmail')) ? (
-      <Admin />
-    ) : (
-      <div style={{ textAlign: 'center', marginTop: '50px', color: 'var(--text-main)' }}>
-        <h1>403 - Access Denied</h1>
-        <p>You are not authorized to view this page.</p>
-        <br></br>
-        <Link to="/" className="btn-primary" style={{ padding: '10px 20px' }}>Return Home</Link>
-      </div>
-    )
-  } 
-/>
-</Routes>
+          <Route path="/admin" element={
+            ['roshankrishnaraj10@gmail.com', 'varshiniilango08@gmail.com'].includes(localStorage.getItem('userEmail')) ? (
+              <Admin />
+            ) : (
+              <div style={{ textAlign: 'center', marginTop: '50px', color: 'var(--text-main)' }}>
+                <h1>403 - Access Denied</h1>
+                <p>You are not authorized to view this page.</p>
+                <br></br>
+                <Link to="/" className="btn-primary" style={{ padding: '10px 20px' }}>Return Home</Link>
+              </div>
+            )
+          } />
+        </Routes>
+
+        
       </main>
     </div>
   );
