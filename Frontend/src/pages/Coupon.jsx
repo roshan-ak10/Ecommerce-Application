@@ -9,7 +9,7 @@ function Coupons() {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/coupons/active');
+        const response = await axios.get('${import.meta.env.VITE_API_URL}/api/coupons/active');
         setCoupons(response.data);
       } catch (error) {
         console.error("Error fetching coupons:", error);

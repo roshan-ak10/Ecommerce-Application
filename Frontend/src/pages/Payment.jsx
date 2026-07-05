@@ -28,7 +28,7 @@ function Payment() {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:5000/api/coupons/validate', { code: couponCode });
+      const response = await axios.post('${import.meta.env.VITE_API_URL}/api/coupons/validate', { code: couponCode });
       setDiscountPercent(response.data.discount);
       setMessage({ type: 'success', text: `Success! ${response.data.discount}% discount applied.` });
     } catch (error) {
