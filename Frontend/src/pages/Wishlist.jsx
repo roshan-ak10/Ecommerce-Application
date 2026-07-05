@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useWishlist } from '../context/WishlistContext';
+import { useWishlist } from '../context/wishlistContext';
 import { useCart } from '../context/CartContext';
 import { AiFillHeart } from 'react-icons/ai';
 

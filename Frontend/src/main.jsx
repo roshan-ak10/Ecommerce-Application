@@ -4,7 +4,7 @@ import App from './App.jsx';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { CartProvider } from './context/CartContext.jsx';
-import { WishlistProvider } from './context/WishlistContext';
+import { WishlistProvider } from './context/wishlistContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Categories from '../categories'; 
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext'; 
+import { useWishlist } from '../context/wishlistContext'; 
 
 const getStableNumber = (id = "", min, max) => {
   let sum = 0;
