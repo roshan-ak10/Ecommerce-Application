@@ -65,7 +65,7 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
             </span>
           </Link>
         </li>
-        <li><Link to="/profile" className="nav-link">Profile</Link></li>
+        <li><Link to="/menu" className="nav-link">Menu</Link></li>
         
         {/* --- NAVBAR LOGIN/LOGOUT BUTTON --- */}
         {authUser ? (

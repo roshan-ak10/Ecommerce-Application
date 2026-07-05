@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-function Categories() {
+// Accept the selected category and the function to change it as props
+function Categories({ selectedCategory, onSelectCategory }) {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const categories = [
+    { name: 'All', icon: '🛍️' }, // Added an 'All' option
     { name: 'Mobiles', icon: '📱' },
     { name: 'Laptops', icon: '💻' },
     { name: 'Electronics', icon: '🔌' },
@@ -10,53 +27,56 @@ function Categories() {
     { name: 'Grocery', icon: '🛒' }
   ];
 
-  // We completely removed the 'theme' prop and 'isDark' logic!
-  
   const containerStyle = {
-    margin:'0px',
-    padding:"0px",
     display: 'flex',
     justifyContent: 'center',
     gap: '20px',
-    // 1. Use your global background color variable
+    padding: isScrolled ? '10px 20px' : '20px', 
     backgroundColor: 'var(--bg-color)', 
-    // 2. Use your global border color variable
-    borderBottom: '1px solid var(--border-color)'
-  };
-
-  const cardStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    cursor: 'pointer',
-    padding: '10px 15px',
-    minWidth: '90px',
-    // 3. Set card background to transparent so it naturally matches the theme
-    backgroundColor: 'transparent',
-    borderRadius: '12px',
-    // 4. Use your global text color variable
-    color: 'var(--text-main)',
-    transition: 'transform 0.2s ease-in-out'
+    overflowX: 'auto',
+    transition: 'padding 0.3s ease' 
   };
 
   return (
     <div style={containerStyle}>
-      {categories.map((cat, index) => (
-        <div
-          key={index}
-          style={cardStyle}
-          // The hover animation stays exactly the same
-          onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-          onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          <span style={{ fontSize: '28px', marginBottom: '8px' }}>
-            {cat.icon}
-          </span>
-          <span style={{ fontSize: '14px', fontWeight: '600' }}>
-            {cat.name}
-          </span>
-        </div>
-      ))}
+      {categories.map((cat, index) => {
+        // Check if this card is the currently selected one
+        const isActive = selectedCategory === cat.name;
+
+        return (
+          <div
+            key={index}
+            // Trigger the filter when clicked
+            onClick={() => onSelectCategory(cat.name)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              cursor: 'pointer',
+              padding: isScrolled ? '5px 15px' : '10px 15px',
+              minWidth: '90px',
+              backgroundColor: 'transparent',
+              borderRadius: '12px',
+              transition: 'all 0.2s ease-in-out',
+              // Add a subtle highlight to the active category
+              borderBottom: isActive ? '3px solid #2874f0' : '3px solid transparent',
+              color: isActive ? '#2874f0' : 'var(--text-main)',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+            onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            {!isScrolled && (
+              <span style={{ fontSize: '28px', marginBottom: '8px', transition: 'all 0.3s ease' }}>
+                {cat.icon}
+              </span>
+            )}
+            
+            <span style={{ fontSize: '14px', fontWeight: isActive ? 'bold' : '600' }}>
+              {cat.name}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

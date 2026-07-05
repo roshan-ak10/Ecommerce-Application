@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom'; 
 import axios from 'axios'; 
-import { FiMenu, FiSearch, FiX, FiFilter, FiSettings, FiLogIn, FiLogOut, FiHelpCircle, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Wishlist from './pages/Wishlist';
@@ -12,6 +11,10 @@ import Admin from './pages/Admin';
 import Cart from './pages/Cart';
 import Navbar from './Navbar';
 import SearchResults from './pages/SearchResults';
+import Checkout from './pages/Checkout';
+import Payment from './pages/Payment';
+import Menu from './pages/Menu';
+import Coupons from './pages/Coupon';
 
 function AppLayout() {
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
@@ -69,14 +72,16 @@ function AppLayout() {
       <div className={`side-menu ${isMenuOpen ? 'open' : ''}`}>
         <div className="menu-header">
           <h2>Menu</h2>
-          <button className="icon-btn" onClick={() => setIsMenuOpen(false)}><FiX /></button>
+          <button className="icon-btn" onClick={() => setIsMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 'bold' }}>
+            X
+          </button>
         </div>
         
         <ul className="menu-list">
           <li className="menu-item-container">
             <div className="menu-item-header" onClick={() => handleAccordion('filters')}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><FiFilter /> Filters</span>
-              {expandedSection === 'filters' ? <FiChevronUp /> : <FiChevronDown />}
+              <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>Filters</span>
+              {expandedSection === 'filters' ? <span>-</span> : <span>+</span>}
             </div>
             
             {expandedSection === 'filters' && (
@@ -92,17 +97,17 @@ function AppLayout() {
             )}
           </li>
 
-          <li><FiSettings /> Settings</li>
-          <li onClick={() => handleNavigation('/help')}><FiHelpCircle /> Help & Support</li>
+          <li>Settings</li>
+          <li onClick={() => handleNavigation('/help')}>Help & Support</li>
           
           {/* --- SIDE MENU LOGIN/LOGOUT BUTTON --- */}
           {authUser ? (
             <li onClick={handleLogout} style={{ borderTop: '1px solid var(--border-color)', paddingTop: '15px', marginTop: '10px', color: 'var(--primary-red)', fontWeight: 'bold', cursor: 'pointer' }}>
-              <FiLogOut style={{ marginRight: '10px' }} /> Logout
+              Logout
             </li>
           ) : (
             <li onClick={() => handleNavigation('/login')} style={{ borderTop: '1px solid var(--border-color)', paddingTop: '15px', marginTop: '10px', color: 'var(--primary-red)', fontWeight: 'bold', cursor: 'pointer' }}>
-              <FiLogIn style={{ marginRight: '10px' }} /> Login / Sign Up
+              Login / Sign Up
             </li>
           )}
         </ul>
@@ -117,6 +122,10 @@ function AppLayout() {
           <Route path="/help" element={<Help />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/coupons" element={<Coupons />} />
           
           <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
           <Route path="/admin" element={
@@ -132,8 +141,6 @@ function AppLayout() {
             )
           } />
         </Routes>
-
-        
       </main>
     </div>
   );
@@ -141,9 +148,9 @@ function AppLayout() {
 
 function App() {
   return (
-    <Router>
+    <>
       <AppLayout />
-    </Router>
+    </>
   );
 }
 

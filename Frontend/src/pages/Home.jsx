@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Categories from '../categories'; 
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext'; 
 
-// Helper function to generate a stable fake rating based on Product ID
 const getStableNumber = (id = "", min, max) => {
   let sum = 0;
   for (let i = 0; i < id.length; i++) {
@@ -38,9 +37,11 @@ const bannerDeals = [
 function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const { addToCart } = useCart();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { toggleWishlist, isFavorited } = useWishlist(); 
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
@@ -66,16 +67,40 @@ function Home() {
   const nextSlide = () => setCurrentSlide(currentSlide === bannerDeals.length - 1 ? 0 : currentSlide + 1);
   const prevSlide = () => setCurrentSlide(currentSlide === 0 ? bannerDeals.length - 1 : currentSlide - 1);
 
+  const displayedProducts = products.filter(product => {
+    if (selectedCategory === 'All') return true;
+    const categoryWords = selectedCategory.toLowerCase().split(' ');
+    const searchRoots = categoryWords.map(word => {
+      let safeWord = word;
+      if (safeWord.endsWith('s')) safeWord = safeWord.slice(0, -1);
+      if (safeWord.length <= 4) return safeWord; 
+      return safeWord.slice(0, Math.ceil(safeWord.length * 0.6));
+    });
+
+    const productCategory = product.category?.toLowerCase() || '';
+    const productType = product.type?.toLowerCase() || '';
+    const productName = product.name?.toLowerCase() || '';
+    
+    return searchRoots.some(root => 
+      productCategory.includes(root) || 
+      productType.includes(root) || 
+      productName.includes(root)
+    );
+  });
+
   return (
     <div style={{ marginTop: '20px' }}>
 
       <div className="sticky-categories-wrapper">
-        <Categories />
+        <Categories 
+          selectedCategory={selectedCategory} 
+          onSelectCategory={setSelectedCategory} 
+        />
       </div>
       
       <section className="banner-container">
-        <button className="banner-btn left" onClick={prevSlide}><FiChevronLeft /></button>
-        <button className="banner-btn right" onClick={nextSlide}><FiChevronRight /></button>
+        <button className="banner-btn left" onClick={prevSlide}>{'<'}</button>
+        <button className="banner-btn right" onClick={nextSlide}>{'>'}</button>
 
         {bannerDeals.map((deal, index) => (
           <div 
@@ -99,56 +124,73 @@ function Home() {
       </section>
 
       <section style={{ padding: '0 20px' }}>
-        <h2>Featured Products</h2>
+        <h2>{selectedCategory === 'All' ? 'Featured Products' : `${selectedCategory}`}</h2>
         
         {loading ? (
           <p style={{ marginTop: '15px' }}>Loading products...</p>
         ) : (
-          /* REMOVED INLINE STYLES SO product-grid-4 CLASS CAN CONTROL THE LAYOUT */
           <div className="product-grid-4">
             
-            {products.map((product) => {
-              const fakeOriginalPrice = Math.floor(product.price * 1.3);
-              const fakeRating = getStableNumber(product._id || product.name, 3.5, 4.9).toFixed(1); 
-              const fakeReviews = Math.floor(getStableNumber(product._id || product.name, 100, 5000));
+            {displayedProducts.length > 0 ? (
+              displayedProducts.map((product) => {
+                const fakeOriginalPrice = Math.floor(product.price * 1.3);
+                const fakeRating = getStableNumber(product._id || product.name, 3.5, 4.9).toFixed(1); 
+                const fakeReviews = Math.floor(getStableNumber(product._id || product.name, 100, 5000));
 
-              return (
-                <div key={product._id} className="product-outer-wrapper">
-                  <div className="product-image-box">
-                    <img src={product.image} alt={product.name} />
-                  </div>
-                  
-                  <div className="product-info-outside">
-                    <div className="product-title-row">
-                      <strong>{product.brand || "Brand"}</strong>
-                      {product.name}
-                    </div>
-
-                    <div className="rating-text">
-                       <span style={{ backgroundColor: '#388e3c', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                         {fakeRating} ★
-                       </span>
-                       <span style={{ color: '#878787', fontSize: '13px' }}>({fakeReviews.toLocaleString('en-IN')})</span>
+                return (
+                  <div key={product._id} className="product-outer-wrapper">
+                    
+                    {/* UPDATED: Using the clean CSS classes */}
+                    <div className="product-image-box">
+                      <img src={product.image} alt={product.name} />
+                      
+                      <button 
+                        className={`wishlist-btn ${isFavorited(product._id) ? 'favorited' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleWishlist(product);
+                        }}
+                      >
+                        {isFavorited(product._id) ? '♥' : '♡'}
+                      </button>
                     </div>
                     
-                    <div className="product-price-row">
-                      <span className="price-original">₹{fakeOriginalPrice.toLocaleString('en-IN')}</span>
-                      <span className="price-current">₹{product.price.toLocaleString('en-IN')}</span>
+                    <div className="product-info-outside">
+                      <div className="product-title-row">
+                        <strong>{product.brand || "Brand"}</strong>
+                        {product.name}
+                      </div>
+
+                      <div className="rating-text">
+                         <span style={{ backgroundColor: '#388e3c', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                           {fakeRating} ★
+                         </span>
+                         <span style={{ color: '#878787', fontSize: '13px' }}>({fakeReviews.toLocaleString('en-IN')})</span>
+                      </div>
+                      
+                      <div className="product-price-row">
+                        <span className="price-original">₹{fakeOriginalPrice.toLocaleString('en-IN')}</span>
+                        <span className="price-current">₹{product.price.toLocaleString('en-IN')}</span>
+                      </div>
+                      
+                      {product.quantity > 0 ? (
+                        <button className="add-to-cart-modern" onClick={() => addToCart(product)}>
+                          Add to Cart
+                        </button>
+                      ) : (
+                        <button className="add-to-cart-modern" disabled>
+                          Out of Stock
+                        </button>
+                      )} 
                     </div>
-                    
-                    {product.quantity > 0 ? (
-                      <button className="add-to-cart-modern" onClick={() => addToCart(product)}>
-                        Add to Cart
-                      </button>
-                    ) : (
-                      <button className="add-to-cart-modern" disabled>
-                        Out of Stock
-                      </button>
-                    )} 
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <p style={{ gridColumn: '1 / -1', padding: '20px 0', fontSize: '16px', color: 'var(--text-muted)' }}>
+                No items found in {selectedCategory}.
+              </p>
+            )}
           </div>
         )}
       </section>

@@ -2,11 +2,13 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const CartContext = createContext();
 
+
 export const useCart = () => {
   return useContext(CartContext);
 };
 
 export const CartProvider = ({ children }) => {
+  const [buyNowItem, setBuyNowItem] = useState(null);
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem('redkart_cart');
     return savedCart ? JSON.parse(savedCart) : [];
@@ -51,7 +53,7 @@ export const CartProvider = ({ children }) => {
 
   // Make sure to expose the new functions at the bottom!
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeFromCart }}>
+    <CartContext.Provider value={{ cartItems, addToCart, buyNowItem , setBuyNowItem , updateQuantity, removeFromCart }}>
       {children}
     </CartContext.Provider>
   );

@@ -426,7 +426,6 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden; /* Keeps the image inside the rounded corners */
   transition: box-shadow 0.2s ease;
@@ -685,4 +684,40 @@ body {
 .fk-category-item {
   padding: 5px 10px; /* Reduced vertical padding */
   font-size: 12px;
+}
+
+/* --- WISHLIST HEART BUTTON --- */
+.product-image-box {
+  position: relative; /* Ensures the heart stays inside the image area */
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  font-size: 22px;
+  line-height: 1;
+  color: #666; /* Default gray color for empty heart */
+  transition: all 0.2s ease-in-out;
+  z-index: 10;
+}
+
+/* Add a slight pop effect when hovering */
+.wishlist-btn:hover {
+  transform: scale(1.1);
+}
+
+/* This class gets applied dynamically in React to make it red */
+.wishlist-btn.favorited {
+  color: #e53935;
 }

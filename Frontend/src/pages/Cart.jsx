@@ -78,7 +78,7 @@ function Cart() {
               <span>Total Price:</span>
               <span>₹{calculateTotal().toLocaleString('en-IN')}</span>
             </div>
-            <button className="btn-primary">Proceed to Checkout</button>
+            <button className="btn-primary" onClick={() => navigate('/checkout')}>Proceed to Checkout</button>
           </div>
           
         </div>

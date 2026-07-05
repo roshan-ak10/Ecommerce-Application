@@ -9,12 +9,16 @@ const userSchema = new mongoose.Schema({
   email: { 
     type: String, 
     required: true, 
-    unique: true // Prevents duplicate accounts
+    unique: true
   },
   password: { 
     type: String, 
     required: true 
-  }
+  },
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product' // Must match the name of your exported Product model exactly!
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
