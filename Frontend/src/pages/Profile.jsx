@@ -16,7 +16,7 @@ function Profile() {
     const fetchProfile = async () => {
       if (!currentUserEmail) return;
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/${encodeURIComponent(currentUserEmail)}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${encodeURIComponent(currentUserEmail)}`);
         if (response.data && response.data.addresses) {
           setSavedAddresses(response.data.addresses);
         }
@@ -42,7 +42,7 @@ function Profile() {
 
       // If we have an editAddressId, we are UPDATING an old address
       if (editAddressId) {
-        response = await axios.put('http://localhost:5000/api/users/edit-address', {
+        response = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit-address`, {
           email: currentUserEmail,
           addressId: editAddressId,
           updatedAddress: formData
