@@ -15,6 +15,7 @@ import Checkout from './pages/Checkout';
 import Payment from './pages/Payment';
 import Menu from './pages/Menu';
 import Coupons from './pages/Coupon';
+import Collection from './pages/Collection';
 
 function AppLayout() {
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
@@ -128,6 +129,7 @@ function AppLayout() {
           <Route path="/coupons" element={<Coupons />} />
           
           <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
+          <Route path="/collection/:categoryName" element={<Collection />} />
           <Route path="/admin" element={
             ['roshankrishnaraj10@gmail.com', 'varshiniilango08@gmail.com'].includes(localStorage.getItem('userEmail')) ? (
               <Admin />

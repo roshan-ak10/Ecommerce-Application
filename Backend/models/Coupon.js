@@ -5,7 +5,7 @@ const couponSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     unique: true, 
-    uppercase: true // Automatically converts codes like "summer10" to "SUMMER10"
+    uppercase: true 
   },
   discountPercentage: { 
     type: Number, 
@@ -20,6 +20,12 @@ const couponSchema = new mongoose.Schema({
   isActive: { 
     type: Boolean, 
     default: true 
+  },
+  // --- NEW: The Auto-Delete Timer ---
+  expiresAt: {
+    type: Date,
+    required: true,
+    expires: 0 // This tells MongoDB to delete the document exactly at this Date!
   }
 }, { timestamps: true });
 

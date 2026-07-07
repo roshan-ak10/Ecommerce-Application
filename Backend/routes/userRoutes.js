@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, logoutUser } = require('../controllers/userCtrl');
+const userCtrl = require('../controllers/userCtrl');
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.post('/logout', logoutUser);
+router.post('/register', userCtrl.registerUser);
+router.post('/login', userCtrl.loginUser);
+router.post('/logout', userCtrl.logoutUser);
+router.post('/add-address', userCtrl.addAddress);
+router.put('/edit-address', userCtrl.editAddress);
+router.delete('/delete-address/:email/:addressId', userCtrl.deleteAddress);
+router.get('/:email', userCtrl.getUserProfile);
 
 module.exports = router;

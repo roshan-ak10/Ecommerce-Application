@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useCart } from '../context/CartContext'; 
+import { useCart } from '../context/CartContext';
+import QRCode from 'react-qr-code'; 
 
 function Payment() {
-  // 1. Pull buyNowItem and setBuyNowItem from the context
   const { cartItems, buyNowItem, setBuyNowItem } = useCart();
   const navigate = useNavigate();
 
+  // --- ⚠️ YOUR UPI DETAILS HERE ⚠️ ---
+  const myUpiId = "roshankrishnaraj10@okicici"; 
+  const myStoreName = "RedKart.in";
+  
   const [couponCode, setCouponCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // New state for the user's UPI reference number
+  const [utrNumber, setUtrNumber] = useState('');
 
-  // 2. THE FIX: Determine which items we are calculating the price for!
-  // If buyNowItem exists, put it in an array by itself. Otherwise, use the full cart.
+  const [transactionRef] = useState(() => "TXN" + Date.now());
+
   const activeItems = buyNowItem ? [buyNowItem] : cartItems;
-
-  // Calculate totals based on the activeItems
   const subtotal = activeItems?.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0) || 0;
   const discountAmount = (subtotal * discountPercent) / 100;
   const finalTotal = subtotal - discountAmount;
+
+ // --- UPI QR CODE FIXES ---
+  const encodedName = encodeURIComponent(myStoreName);
+  const formattedAmount = finalTotal.toFixed(2);
+  
+  // Added the &tr= parameter to satisfy strict UPI apps!
+  const upiLink = `upi://pay?pa=${myUpiId}&pn=${encodedName}&am=${formattedAmount}&cu=INR&tr=${transactionRef}`;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -43,17 +55,22 @@ function Payment() {
       return navigate('/');
     }
 
+    if (utrNumber.length < 12) {
+      alert("Please enter a valid 12-digit UTR/Reference number after paying.");
+      return;
+    }
+
     setIsProcessing(true);
     
+    // Here you would normally send the order and UTR to your backend:
+    // axios.post('/api/orders', { items: activeItems, total: finalTotal, utr: utrNumber })
+
     setTimeout(() => {
       setIsProcessing(false);
-      alert(`Payment of ₹${finalTotal.toLocaleString('en-IN')} successful!`);
+      alert(`Order Placed! We will verify UTR: ${utrNumber} and process your order soon.`);
       
-      // 3. Clear the Buy Now state after a successful purchase so it doesn't get stuck!
       if (buyNowItem) {
         setBuyNowItem(null); 
-      } else {
-        // clearCart(); // If you have a clearCart function for standard cart checkouts
       }
       
       navigate('/');
@@ -70,7 +87,6 @@ function Payment() {
         </h3>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-          {/* Dynamically show if it's 1 item or the full cart */}
           <span>Subtotal ({activeItems?.length || 0} items):</span>
           <span>₹{subtotal.toLocaleString('en-IN')}</span>
         </div>
@@ -88,6 +104,7 @@ function Payment() {
         </div>
       </div>
 
+      {/* --- COUPON SECTION --- */}
       <div style={{ marginBottom: '30px' }}>
         <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>Have a coupon code?</p>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -112,12 +129,37 @@ function Payment() {
         )}
       </div>
 
+      {/* --- UPI QR CODE SECTION --- */}
+      <div style={{ textAlign: 'center', marginBottom: '30px', padding: '20px', border: '2px dashed #4caf50', borderRadius: '8px' }}>
+        <h3 style={{ marginBottom: '15px', color: '#4caf50' }}>Pay via UPI</h3>
+        <p style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>
+          Scan this QR code with GPay, PhonePe, or Paytm to pay exactly ₹{finalTotal.toLocaleString('en-IN')}.
+        </p>
+        
+        <div style={{ background: 'white', padding: '15px', display: 'inline-block', borderRadius: '8px', marginBottom: '20px' }}>
+          <QRCode value={upiLink} size={180} />
+        </div>
+
+        <div style={{ textAlign: 'left' }}>
+          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+            Enter 12-Digit UTR / Reference Number after paying:
+          </label>
+          <input 
+            type="text" 
+            placeholder="e.g., 312345678901"
+            value={utrNumber}
+            onChange={(e) => setUtrNumber(e.target.value)}
+            style={{ width: '100%', padding: '12px', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '16px' }}
+          />
+        </div>
+      </div>
+
       <button 
         onClick={handlePayment}
         disabled={isProcessing}
         style={{ width: '100%', backgroundColor: '#fb641b', color: 'white', border: 'none', padding: '15px', borderRadius: '4px', fontSize: '18px', fontWeight: 'bold', cursor: isProcessing ? 'not-allowed' : 'pointer', opacity: isProcessing ? 0.7 : 1 }}
       >
-        {isProcessing ? 'Processing...' : `PAY ₹${finalTotal.toLocaleString('en-IN')}`}
+        {isProcessing ? 'Processing...' : `Submit Order (₹${finalTotal.toLocaleString('en-IN')})`}
       </button>
     </div>
   );

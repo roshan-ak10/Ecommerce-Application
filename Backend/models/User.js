@@ -1,4 +1,3 @@
-// backend/models/User.js
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -9,16 +8,29 @@ const userSchema = new mongoose.Schema({
   email: { 
     type: String, 
     required: true, 
-    unique: true
+    unique: true // Ensures no two accounts use the same email
   },
   password: { 
     type: String, 
-    required: true 
+    required: true // We will hash this before saving for security!
   },
-  wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product' // Must match the name of your exported Product model exactly!
-  }]
-}, { timestamps: true });
+  phone: { 
+    type: String 
+  },
+  // We use an array of objects so users can have multiple saved addresses
+  addresses: [{
+    fullName: String,
+    street: String,
+    city: String,
+    state: String,
+    pincode: String,
+    isDefault: { type: Boolean, default: false }
+  }],
+  role: { 
+    type: String, 
+    enum: ['customer', 'admin'], 
+    default: 'customer' // Makes it easy to build your Admin Dashboard later
+  }
+}, { timestamps: true }); // Automatically adds createdAt and updatedAt dates
 
 module.exports = mongoose.model('User', userSchema);

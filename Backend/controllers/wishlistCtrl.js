@@ -1,47 +1,46 @@
-const User = require('../models/User');
+// backend/controllers/wishlistCtrl.js
+const Wishlist = require('../models/Wishlist');
 
 const wishlistCtrl = {
-  // 1. Toggle Item in Wishlist (Using ID)
-  toggleWishlist: async (req, res) => {
+  
+  // 1. GET WISHLIST
+  getWishlist: async (req, res) => {
     try {
-      const { userEmail, productId } = req.body;
+      // Find the wishlist by the email passed in the URL
+      let wishlist = await Wishlist.findOne({ email: req.params.email });
       
-      const user = await User.findOne({ email: userEmail });
-      if (!user) return res.status(404).json({ message: "User not found" });
-
-      // Check if the ID already exists in the array
-      const itemIndex = user.wishlist.indexOf(productId);
-
-      if (itemIndex > -1) {
-        // If it exists, remove it
-        user.wishlist.splice(itemIndex, 1);
-        await user.save();
-        return res.json({ message: "Removed from wishlist", wishlist: user.wishlist });
-      } else {
-        // If it doesn't exist, push the product ID
-        user.wishlist.push(productId);
-        await user.save();
-        return res.json({ message: "Added to wishlist", wishlist: user.wishlist });
+      // If they don't have a wishlist yet, return an empty array
+      if (!wishlist) {
+        return res.status(200).json({ items: [] });
       }
+      
+      res.status(200).json(wishlist);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      console.error("Fetch wishlist error:", error);
+      res.status(500).json({ message: 'Error fetching wishlist', error });
     }
   },
 
-  // 2. Get User's Wishlist Data
-  getWishlist: async (req, res) => {
+  // 2. SYNC WISHLIST
+  syncWishlist: async (req, res) => {
+    const { email, items } = req.body;
+
     try {
-      const { email } = req.query;
-      
-      // .populate('wishlist') looks at the IDs in the array and automatically 
-      // fetches the full product details (name, price, image) from the Product collection!
-      const user = await User.findOne({ email }).populate('wishlist');
-      
-      if (!user) return res.status(404).json({ message: "User not found" });
-      
-      return res.json(user.wishlist);
+      let wishlist = await Wishlist.findOne({ email });
+
+      // If the wishlist exists, update the items. Otherwise, create a new one.
+      if (wishlist) {
+        wishlist.items = items;
+        await wishlist.save();
+      } else {
+        wishlist = new Wishlist({ email, items });
+        await wishlist.save();
+      }
+
+      res.status(200).json(wishlist);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      console.error("Sync wishlist error:", error);
+      res.status(500).json({ message: 'Error syncing wishlist', error });
     }
   }
 };

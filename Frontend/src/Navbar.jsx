@@ -26,7 +26,8 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
   const handleLogout = () => {
     localStorage.removeItem('userName');
     localStorage.removeItem('userEmail');
-    navigate('/login');
+    window.dispatchEvent(new Event('userChanged'));
+    window.location.href = '/login';
   };
 
   return (
@@ -65,7 +66,7 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
             </span>
           </Link>
         </li>
-        <li><Link to="/menu" className="nav-link">Menu</Link></li>
+        <li><Link to="/menu" className="nav-link">Account</Link></li>
         
         {/* --- NAVBAR LOGIN/LOGOUT BUTTON --- */}
         {authUser ? (

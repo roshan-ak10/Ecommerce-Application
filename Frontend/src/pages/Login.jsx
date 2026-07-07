@@ -40,7 +40,8 @@ function Login({ setAuthUser }) {
         }, axiosConfig); 
         
         localStorage.setItem('userName', response.data.name);
-        localStorage.setItem('userEmail', response.data.email);        
+        localStorage.setItem('userEmail', response.data.email);  
+        window.dispatchEvent(new Event('userChanged'));      
         if (setAuthUser) setAuthUser(response.data.name); 
         
         navigate('/'); 
@@ -54,6 +55,10 @@ function Login({ setAuthUser }) {
         }, axiosConfig); 
 
         localStorage.setItem('userName', response.data.name);
+        localStorage.setItem('userEmail', response.data.email);
+
+        window.dispatchEvent(new Event('userChanged'));
+
         if (setAuthUser) setAuthUser(response.data.name); 
         
         navigate('/'); 

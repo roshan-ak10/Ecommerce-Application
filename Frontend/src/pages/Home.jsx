@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // <-- ADDED: Navigation hook
 import Categories from '../categories'; 
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/wishlistContext'; 
@@ -18,30 +19,39 @@ const bannerDeals = [
     id: 1,
     title: "Summer Tech Sale",
     subtitle: "Up to 40% off on Premium Laptops & Accessories",
-    image: "https://images.unsplash.com/photo-1531297172867-4f541313ce87?q=80&w=1200&auto=format&fit=crop"
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOCDBb4pp2_qjuaYT8-w9tQj3OLLWUJuElOJA_ZOS1Jw&s=10",
+    targetCategory: "electronics" // <-- ADDED: Target category for routing
   },
   {
     id: 2,
     title: "New Audio Gear",
     subtitle: "Experience crystal clear sound with our new arrivals",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1200&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1200&auto=format&fit=crop",
+    targetCategory: "tws" // <-- ADDED: Target category for routing
   },
   {
     id: 3,
     title: "Step Up Your Game",
     subtitle: "Exclusive discounts on top sports footwear brands",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop",
+    targetCategory: "shoes" // <-- ADDED: Target category for routing
   }
 ];
 
 function Home() {
+  const navigate = useNavigate(); // <-- ADDED: Initialize navigation
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const { addToCart } = useCart();
-  const { toggleWishlist, isFavorited } = useWishlist(); 
+  const { toggleWishlist, wishlistItems } = useWishlist();
+
+  const isFavorited = (productId) => {
+    return wishlistItems?.some(item => item._id === productId);
+  };
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
@@ -111,7 +121,15 @@ function Home() {
             <div className="banner-content">
               <h2>{deal.title}</h2>
               <p>{deal.subtitle}</p>
-              <button className="btn-primary" style={{ width: 'auto', padding: '12px 30px', fontSize: '16px' }}>Shop Now</button>
+              
+              {/* <-- ADDED: onClick handler for routing --> */}
+              <button 
+                className="btn-primary" 
+                style={{ width: 'auto', padding: '12px 30px', fontSize: '16px' }}
+                onClick={() => navigate(`/collection/${deal.targetCategory}`)}
+              >
+                Shop Now
+              </button>
             </div>
           </div>
         ))}
@@ -140,7 +158,6 @@ function Home() {
                 return (
                   <div key={product._id} className="product-outer-wrapper">
                     
-                    {/* UPDATED: Using the clean CSS classes */}
                     <div className="product-image-box">
                       <img src={product.image} alt={product.name} />
                       

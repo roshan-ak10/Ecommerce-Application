@@ -686,38 +686,35 @@ body {
   font-size: 12px;
 }
 
-/* --- WISHLIST HEART BUTTON --- */
 .product-image-box {
-  position: relative; /* Ensures the heart stays inside the image area */
+  position: relative; 
 }
-
+/* The button MUST be absolute with a high z-index */
 .wishlist-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background-color: white;
   border: none;
   border-radius: 50%;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  font-size: 22px;
-  line-height: 1;
-  color: #666; /* Default gray color for empty heart */
-  transition: all 0.2s ease-in-out;
-  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-size: 28px;
+  color: #ccc; /* Default empty heart color */
+  transition: all 0.2s;
 }
 
-/* Add a slight pop effect when hovering */
 .wishlist-btn:hover {
   transform: scale(1.1);
 }
-
-/* This class gets applied dynamically in React to make it red */
 .wishlist-btn.favorited {
-  color: #e53935;
+  color: #f70d20; 
+    border: none;
+  border-radius: 50%;
 }

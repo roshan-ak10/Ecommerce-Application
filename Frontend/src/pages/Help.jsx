@@ -1,4 +1,3 @@
-// src/pages/Help.jsx
 import React from 'react';
 
 function Help() {

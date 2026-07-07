@@ -27,11 +27,23 @@ const couponCtrl = {
     }
   },
 
-  // 3. Create a coupon (You can hit this route from Postman or your Admin page)
+ // 3. Create a coupon (Updated with Expiration Date)
   createCoupon: async (req, res) => {
     try {
-      const { code, discountPercentage, description } = req.body;
-      const newCoupon = new Coupon({ code, discountPercentage, description });
+      // Grab the new expiryDate from the frontend request
+      const { code, discountPercentage, description, expiryDate } = req.body;
+
+      if (!expiryDate) {
+        return res.status(400).json({ error: "Please provide an expiration date." });
+      }
+
+      const newCoupon = new Coupon({ 
+        code, 
+        discountPercentage, 
+        description,
+        expiresAt: new Date(expiryDate) // Converts the string to a real MongoDB Date object
+      });
+      
       await newCoupon.save();
       return res.json({ message: "Coupon created successfully", newCoupon });
     } catch (error) {
