@@ -79,7 +79,7 @@ export const CartProvider = ({ children }) => {
 
     const syncCartToDB = async () => {
       try {
-        await axios.post('${import.meta.env.VITE_API_URL}/api/cart/sync', {
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/sync`, {
           email: currentUser, // Sending the email exactly as you updated it!
           items: cartItems
         });
