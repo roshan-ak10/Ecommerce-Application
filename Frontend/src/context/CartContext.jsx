@@ -49,7 +49,7 @@ export const CartProvider = ({ children }) => {
         if (!cancelled) setIsCartLoaded(false); // Lock sync during fetch
 
         const response = await axios.get(
-          `http://localhost:5000/api/cart/${encodeURIComponent(currentUser)}`
+          `${import.meta.env.VITE_API_URL}/api/cart/${encodeURIComponent(currentUser)}`
         );
 
         if (!cancelled) {
@@ -79,7 +79,7 @@ export const CartProvider = ({ children }) => {
 
     const syncCartToDB = async () => {
       try {
-        await axios.post('http://localhost:5000/api/cart/sync', {
+        await axios.post('${import.meta.env.VITE_API_URL}/api/cart/sync', {
           email: currentUser, // Sending the email exactly as you updated it!
           items: cartItems
         });

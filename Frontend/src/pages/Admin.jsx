@@ -14,7 +14,7 @@ function Admin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://localhost:5000/api/products`, formData, { withCredentials: true });
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/products`, formData, { withCredentials: true });
       alert('Product added successfully!');
       setFormData({ name: '', brand: '', price: '', image: '', description: '', category: '', type: '', quantity: '' });
     } catch (error) {
