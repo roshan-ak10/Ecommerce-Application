@@ -50,7 +50,7 @@ function Profile() {
       } 
       // Otherwise, we are CREATING a new address
       else {
-        response = await axios.post('http://localhost:5000/api/users/add-address', {
+        response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/add-address`, {
           email: currentUserEmail,
           address: formData
         });
@@ -100,7 +100,7 @@ function Profile() {
     try {
       // Send DELETE request with parameters in the URL
       const response = await axios.delete(
-        `http://localhost:5000/api/users/delete-address/${encodeURIComponent(currentUserEmail)}/${addressId}`
+        `${import.meta.env.VITE_API_URL}/api/users/delete-address/${encodeURIComponent(currentUserEmail)}/${addressId}`
       );
       
       // Instantly remove it from the screen
@@ -187,7 +187,7 @@ function Profile() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {savedAddresses.map((addr) => (
               <div key={addr._id} style={{ border: '1px solid #e0e0e0', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', position: 'relative' }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', paddingRight: '80px' }}>{addr.fullName}</h4>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', paddingRight: '80px' , color:'#555'}}>{addr.fullName}</h4>
                 <p style={{ margin: '0 0 5px 0', color: '#555' }}>{addr.street}</p>
                 <p style={{ margin: '0', color: '#555' }}>{addr.city}, {addr.state} - <strong>{addr.pincode}</strong></p>
                 
