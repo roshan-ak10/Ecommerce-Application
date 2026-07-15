@@ -39,7 +39,7 @@ function Checkout() {
             <input type="text" name="zip" placeholder="Zip" value={address.zip} onChange={handleChange} required className="search-input" style={{ border: '1px solid #ccc' }} />
           </div>
 
-          <button type="submit" className="add-to-cart-modern" style={{ marginTop: '20px', padding: '15px', fontSize: '16px' }}>
+          <button type="submit" className="add-to-cart-modern" style={{ marginTop: '20px', padding: '15px', fontSize: '16px'  }}>
             Confirm & Proceed to Payment
           </button>
         </form>

@@ -16,6 +16,8 @@ import Payment from './pages/Payment';
 import Menu from './pages/Menu';
 import Coupons from './pages/Coupon';
 import Collection from './pages/Collection';
+import UserOrders from './pages/UserOrders';
+import AdminOrders from './pages/AdminOrders';
 
 function AppLayout() {
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
@@ -127,6 +129,8 @@ function AppLayout() {
           <Route path="/payment" element={<Payment />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/coupons" element={<Coupons />} />
+          <Route path="/orders" element={<UserOrders />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
           
           <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
           <Route path="/collection/:categoryName" element={<Collection />} />

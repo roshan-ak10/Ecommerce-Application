@@ -5,6 +5,10 @@ import { useCart } from './context/CartContext'; // Connects your cart badge
 
 // We pass setIsMenuOpen as a prop in case you have a sidebar menu in App.jsx
 function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
+  const userEmail = localStorage.getItem('userEmail');
+  const userName = localStorage.getItem('userName');
+
+  const isAdmin = userEmail === "roshankrishnaraj10@gmail.com";
   const { cartItems } = useCart();
   const navigate = useNavigate();
 
@@ -56,6 +60,15 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
         </form>
       
       <ul className="nav-links">
+
+        {isAdmin && (
+          <li>
+            <Link to="/admin/orders" className="nav-link" style={{ color: '#d32f2f', fontWeight: 'bold' }}>
+              AdminPage
+            </Link>
+          </li>
+        )}
+
         <li><Link to="/" className="nav-link">Shop</Link></li>
         <li>
           <Link to="/cart" className="nav-link">

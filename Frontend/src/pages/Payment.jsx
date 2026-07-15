@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import QRCode from 'react-qr-code'; 
 
 function Payment() {
-  const { cartItems, buyNowItem, setBuyNowItem } = useCart();
+  const { cartItems, setCartItems, buyNowItem, setBuyNowItem } = useCart();
   const navigate = useNavigate();
 
-  // --- ⚠️ YOUR UPI DETAILS HERE ⚠️ ---
+  // --- UPI DETAILS ---
   const myUpiId = "roshankrishnaraj10@okicici"; 
   const myStoreName = "RedKart.in";
   
@@ -16,22 +16,31 @@ function Payment() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // New state for the user's UPI reference number
   const [utrNumber, setUtrNumber] = useState('');
-
   const [transactionRef] = useState(() => "TXN" + Date.now());
+  
+  // New state to hold the address from Step 1
+  const [shippingAddress, setShippingAddress] = useState(null);
+
+  // 1. Grab the address from localStorage
+  useEffect(() => {
+    const savedAddress = JSON.parse(localStorage.getItem('userAddress'));
+    if (!savedAddress) {
+      alert("Missing delivery details. Please fill out your address first.");
+      navigate('/checkout'); 
+    } else {
+      setShippingAddress(savedAddress);
+    }
+  }, [navigate]);
 
   const activeItems = buyNowItem ? [buyNowItem] : cartItems;
   const subtotal = activeItems?.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0) || 0;
   const discountAmount = (subtotal * discountPercent) / 100;
   const finalTotal = subtotal - discountAmount;
 
- // --- UPI QR CODE FIXES ---
+  // --- UPI QR CODE FIXES ---
   const encodedName = encodeURIComponent(myStoreName);
   const formattedAmount = finalTotal.toFixed(2);
-  
-  // Added the &tr= parameter to satisfy strict UPI apps!
   const upiLink = `upi://pay?pa=${myUpiId}&pn=${encodedName}&am=${formattedAmount}&cu=INR&tr=${transactionRef}`;
 
   const handleApplyCoupon = async () => {
@@ -40,7 +49,7 @@ function Payment() {
       return;
     }
     try {
-      const response = await axios.post('${import.meta.env.VITE_API_URL}/api/coupons/validate', { code: couponCode });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/coupons/validate`, { code: couponCode });
       setDiscountPercent(response.data.discount);
       setMessage({ type: 'success', text: `Success! ${response.data.discount}% discount applied.` });
     } catch (error) {
@@ -49,7 +58,8 @@ function Payment() {
     }
   };
 
-  const handlePayment = () => {
+  // 2. The Final Order Submission
+  const handlePayment = async () => {
     if (finalTotal === 0 && activeItems?.length === 0) {
       alert("No items to purchase!");
       return navigate('/');
@@ -60,32 +70,59 @@ function Payment() {
       return;
     }
 
-    setIsProcessing(true);
-    
-    // Here you would normally send the order and UTR to your backend:
-    // axios.post('/api/orders', { items: activeItems, total: finalTotal, utr: utrNumber })
+    try {
+      setIsProcessing(true);
+      
+      // Prepare the exact data payload for MongoDB
+      const orderData = {
+        items: activeItems,
+        totalAmount: finalTotal,
+        shippingAddress: shippingAddress,
+        utrNumber: utrNumber // Passing the UTR to the backend!
+      };
 
-    setTimeout(() => {
-      setIsProcessing(false);
+      // Send to backend
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/orders/create`, 
+        orderData, 
+        { withCredentials: true } 
+      );
+
       alert(`Order Placed! We will verify UTR: ${utrNumber} and process your order soon.`);
       
+      // Clear the correct cart
       if (buyNowItem) {
         setBuyNowItem(null); 
+      } else {
+        setCartItems([]); 
       }
       
-      navigate('/');
-    }, 2000);
+      // Redirect to the new Amazon-style tracking page
+      navigate('/my-orders'); 
+
+    } catch (error) {
+      console.error("Order failed:", error);
+      alert("Payment failed or server error. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  // Don't render the page until the address is loaded
+  if (!shippingAddress) return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading secure payment...</div>;
 
   return (
     <div style={{ padding: '40px 20px', maxWidth: '600px', margin: '0 auto' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Secure Payment</h2>
 
-      <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px solid var(--border-color)' }}>
-        <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '15px' }}>
-          Order Summary
-        </h3>
+      {/* --- ORDER SUMMARY (Now includes Address Preview) --- */}
+      <div style={{ backgroundColor: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px solid #ddd' }}>
+        <h3 style={{ borderBottom: '1px solid #ddd', paddingBottom: '10px', marginBottom: '15px' }}>Order Summary</h3>
         
+        <div style={{ marginBottom: '15px', color: '#555', fontSize: '14px' }}>
+          <strong>Delivering to:</strong> {shippingAddress.fullName} - {shippingAddress.city}, {shippingAddress.state}
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
           <span>Subtotal ({activeItems?.length || 0} items):</span>
           <span>₹{subtotal.toLocaleString('en-IN')}</span>
@@ -98,7 +135,7 @@ function Payment() {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', paddingTop: '15px', borderTop: '1px solid var(--border-color)', fontSize: '20px', fontWeight: 'bold' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '20px', fontWeight: 'bold' }}>
           <span>Total to Pay:</span>
           <span>₹{finalTotal.toLocaleString('en-IN')}</span>
         </div>
@@ -113,7 +150,7 @@ function Payment() {
             placeholder="Enter code here..." 
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-            style={{ flex: 1, padding: '12px', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '16px', textTransform: 'uppercase' }}
+            style={{ flex: 1, padding: '12px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '16px', textTransform: 'uppercase' }}
           />
           <button 
             onClick={handleApplyCoupon}
@@ -132,7 +169,7 @@ function Payment() {
       {/* --- UPI QR CODE SECTION --- */}
       <div style={{ textAlign: 'center', marginBottom: '30px', padding: '20px', border: '2px dashed #4caf50', borderRadius: '8px' }}>
         <h3 style={{ marginBottom: '15px', color: '#4caf50' }}>Pay via UPI</h3>
-        <p style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>
+        <p style={{ marginBottom: '20px', color: '#666' }}>
           Scan this QR code with GPay, PhonePe, or Paytm to pay exactly ₹{finalTotal.toLocaleString('en-IN')}.
         </p>
         
@@ -149,7 +186,7 @@ function Payment() {
             placeholder="e.g., 312345678901"
             value={utrNumber}
             onChange={(e) => setUtrNumber(e.target.value)}
-            style={{ width: '100%', padding: '12px', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '16px' }}
+            style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '16px' }}
           />
         </div>
       </div>

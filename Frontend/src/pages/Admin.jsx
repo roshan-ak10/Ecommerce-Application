@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import AdminOrders from './AdminOrders';
 
 function Admin() {
   const [activeTab, setActiveTab] = useState('products');
@@ -119,10 +120,8 @@ const handleCouponSubmit = async (e) => {
 
       case 'orders':
         return (
-          <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ marginTop: 0 }}>Customer Orders</h2>
-            <p style={{ color: '#666' }}>List of user orders will appear here.</p>
-          </div>
+          <div><AdminOrders/></div>
+          
         );
 
       default:
