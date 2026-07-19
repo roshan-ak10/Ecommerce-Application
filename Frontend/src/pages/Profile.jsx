@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext'; // adjust path if different
 
 function Profile() {
-  const currentUserEmail = localStorage.getItem('userEmail');
+  const { user, isLoading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({ fullName: '', street: '', city: '', state: '', pincode: '' });
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState([]);
-  
-  // NEW: State to track if we are editing an existing address
   const [editAddressId, setEditAddressId] = useState(null);
 
   useEffect(() => {
+    if (authLoading || !user) return;
     const fetchProfile = async () => {
-      if (!currentUserEmail) return;
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${encodeURIComponent(currentUserEmail)}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/users/profile`,
+          { withCredentials: true }
+        );
         if (response.data && response.data.addresses) {
           setSavedAddresses(response.data.addresses);
         }
@@ -25,13 +27,12 @@ function Profile() {
       }
     };
     fetchProfile();
-  }, [currentUserEmail]);
+  }, [user, authLoading]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- SAVE OR UPDATE ADDRESS ---
   const handleSaveAddress = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,27 +40,19 @@ function Profile() {
 
     try {
       let response;
-
-      // If we have an editAddressId, we are UPDATING an old address
       if (editAddressId) {
         response = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit-address`, {
-          email: currentUserEmail,
           addressId: editAddressId,
           updatedAddress: formData
-        });
-      } 
-      // Otherwise, we are CREATING a new address
-      else {
+        }, { withCredentials: true });
+      } else {
         response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/add-address`, {
-          email: currentUserEmail,
           address: formData
-        });
+        }, { withCredentials: true });
       }
 
-      setMessage(response.data.message); 
+      setMessage(response.data.message);
       if (response.data.addresses) setSavedAddresses(response.data.addresses);
-      
-      // Clear the form and reset edit mode
       setFormData({ fullName: '', street: '', city: '', state: '', pincode: '' });
       setEditAddressId(null);
 
@@ -71,9 +64,7 @@ function Profile() {
     }
   };
 
-  // --- EDIT BUTTON CLICK ---
   const handleEditClick = (address) => {
-    // Fill the text boxes with the chosen address's data
     setFormData({
       fullName: address.fullName,
       street: address.street,
@@ -81,33 +72,27 @@ function Profile() {
       state: address.state,
       pincode: address.pincode
     });
-    // Set the ID so the Save button knows we are updating
     setEditAddressId(address._id);
     setMessage('');
   };
 
-  // --- CANCEL EDIT ---
   const cancelEdit = () => {
     setFormData({ fullName: '', street: '', city: '', state: '', pincode: '' });
     setEditAddressId(null);
     setMessage('');
   };
 
-  // --- DELETE BUTTON CLICK ---
   const handleDeleteClick = async (addressId) => {
     if (!window.confirm("Are you sure you want to delete this address?")) return;
 
     try {
-      // Send DELETE request with parameters in the URL
       const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/users/delete-address/${encodeURIComponent(currentUserEmail)}/${addressId}`
+        `${import.meta.env.VITE_API_URL}/api/users/delete-address/${addressId}`,
+        { withCredentials: true }
       );
-      
-      // Instantly remove it from the screen
+
       if (response.data.addresses) setSavedAddresses(response.data.addresses);
       setMessage("Address deleted successfully.");
-      
-      // If they deleted the address they were currently editing, clear the form
       if (editAddressId === addressId) cancelEdit();
 
     } catch (error) {
@@ -116,7 +101,8 @@ function Profile() {
     }
   };
 
-  if (!currentUserEmail) {
+  if (authLoading) return null; // or a spinner
+  if (!user) {
     return <div style={{ textAlign: 'center', marginTop: '50px', fontSize: '18px' }}>Please login to view your profile.</div>;
   }
 
@@ -138,28 +124,28 @@ function Profile() {
         <form onSubmit={handleSaveAddress} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <div>
             <label style={{ fontWeight: 'bold' }}>Full Name</label><br />
-            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+            <input type="text" placeholder="Enter Your Name"name="fullName" value={formData.fullName} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
           </div>
 
           <div>
             <label style={{ fontWeight: 'bold' }}>Street Address</label><br />
-            <input type="text" name="street" value={formData.street} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+            <input type="text" name="street" placeholder="Address" value={formData.street} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
             <div style={{ flex: 1 }}>
               <label style={{ fontWeight: 'bold' }}>City</label><br />
-              <input type="text" name="city" value={formData.city} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+              <input type="text" placeholder="City" name="city" value={formData.city} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
             </div>
             <div style={{ flex: 1 }}>
               <label style={{ fontWeight: 'bold' }}>State</label><br />
-              <input type="text" name="state" value={formData.state} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+              <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
             </div>
           </div>
 
           <div>
             <label style={{ fontWeight: 'bold' }}>Pincode</label><br />
-            <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+            <input type="text" placeholder="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>

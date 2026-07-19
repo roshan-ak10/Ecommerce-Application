@@ -1,13 +1,14 @@
-// backend/controllers/cartCtrl.js
 const Cart = require('../models/Cart');
 
 const cartCtrl = {
   // 1. GET CART
   getCart: async (req, res) => {
     try {
-      // CHANGED: Search by email using req.params.email
-      // Note: your route is currently /:username, we will fix that in step 3
-      let cart = await Cart.findOne({ email: req.params.email });
+      // 🛡️ SECURE: Ignore the URL parameter entirely. 
+      // Pull the email directly from the verified token provided by the bouncer.
+      const secureEmail = req.user.email; 
+      
+      let cart = await Cart.findOne({ email: secureEmail });
       
       if (!cart) {
         return res.status(200).json({ items: [] });
@@ -20,19 +21,22 @@ const cartCtrl = {
 
   // 2. SYNC CART
   syncCart: async (req, res) => {
-    // CHANGED: Destructure 'email' from the frontend request instead of username
-    const { email, items } = req.body;
+    // 🛡️ SECURE: Only extract the items from the frontend body. 
+    // Ignore any email they try to send in the request payload.
+    const { items } = req.body;
+    
+    // 🛡️ SECURE: Pull the email directly from the verified token.
+    const secureEmail = req.user.email;
 
     try {
-      // CHANGED: Search by email
-      let cart = await Cart.findOne({ email });
+      let cart = await Cart.findOne({ email: secureEmail });
 
       if (cart) {
         cart.items = items;
         await cart.save();
       } else {
-        // CHANGED: Create a new cart using the email
-        cart = new Cart({ email, items });
+        // Create a new cart using the secure email, not the frontend email
+        cart = new Cart({ email: secureEmail, items });
         await cart.save();
       }
 

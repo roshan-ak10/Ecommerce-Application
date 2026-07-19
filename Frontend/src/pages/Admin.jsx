@@ -35,7 +35,7 @@ function Admin() {
 const handleCouponSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`h${import.meta.env.VITE_API_URL}/api/coupons/create`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/coupons/create`, {
         code: couponData.code.toUpperCase(),
         discountPercentage: Number(couponData.discount),
         description: couponData.description,
@@ -130,10 +130,10 @@ const handleCouponSubmit = async (e) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '85vh', backgroundColor: '#f1f3f6', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', minHeight: '85vh', backgroundColor: 'var(--bg-color)', fontFamily: 'sans-serif' }}>
       
       {/* LEFT SIDEBAR NAVIGATION */}
-      <div style={{ width: '250px', backgroundColor: '#fff', borderRight: '1px solid #e0e0e0', padding: '20px' }}>
+      <div style={{ width: '250px', backgroundColor: 'var(--bg-color)', borderRight: '1px solid #e0e0e0', padding: '20px' }}>
         <h3 style={{ color: '#878787', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '1px', marginBottom: '20px' }}>
           Admin Panel
         </h3>

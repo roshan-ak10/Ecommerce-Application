@@ -7,6 +7,10 @@
   --text-main: #212529;
   --text-muted: #6c757d;
   --border-color: #dee2e6;
+
+  --input-bg: #f9f9f9;       /* Light grey/white for light mode */
+  --input-text: #333333;     /* Dark text so you can read what you type */
+  --input-border: #cccccc;   /* Soft border */
 }
 
 [data-theme='dark'] {
@@ -18,6 +22,33 @@
   --text-main: #f5f5f5;
   --text-muted: #a68a8a;
   --border-color: #330d0d;
+
+  --input-bg: #2a2a2a;       /* Dark background for dark mode */
+  --input-text: #ffffff;     /* White text so you can read it */
+  --input-border: #444444;
+}
+
+/* Force inputs and dropdowns to respect your theme */
+input, select, textarea, option, .auth-input {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+}
+
+select {
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary-red);
+  outline: none;
+}
+
+/* Optional: Make the input text grey when someone types a placeholder */
+input::placeholder, textarea::placeholder {
+  color: #888;
 }
 
 /* --- 2. Global Resets --- */
@@ -27,7 +58,7 @@
   padding: 0;
 }
 
-button, .navbar, .card {
+button, .navbar, .card, .auth-card {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -45,8 +76,10 @@ body {
   padding: 20px;
 }
 
-.card {
+/* Unified Card & Container styling to fix white boxes in dark mode */
+.card, .auth-card, .form-container, .admin-card {
   background-color: var(--bg-card);
+  color: var(--text-main);
   border-radius: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
 }
@@ -75,13 +108,15 @@ body {
 
 /* --- 4. Navigation Bar --- */
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px;
-  background-color: var(--bg-card);
+  background-color: var(--bg-card); /* Now uses theme variable instead of hardcoded color */
   border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.3s ease;
 }
 
 .nav-links {
@@ -112,7 +147,6 @@ body {
   font-weight: bold;
   transition: all 0.3s ease;
 }
-
 
 /* --- 5. Search Bar & Icons --- */
 .search-container {
@@ -280,6 +314,7 @@ body {
 .auth-card {
   width: 100%;
   max-width: 400px;
+  padding: 25px; /* Added padding so it looks like a clean box */
 }
 
 .form-group {
@@ -297,14 +332,8 @@ body {
   padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: var(--bg-main);
-  color: var(--text-main);
   outline: none;
   transition: border-color 0.2s;
-}
-
-.auth-input:focus {
-  border-color: var(--primary-red);
 }
 
 .auth-toggle {
@@ -427,7 +456,7 @@ body {
   flex-direction: column;
   background-color: var(--bg-color);
   border-radius: 6px;
-  overflow: hidden; /* Keeps the image inside the rounded corners */
+  overflow: hidden; 
   transition: box-shadow 0.2s ease;
   height: 100%;
   position: relative;
@@ -437,14 +466,11 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* Replace your current image container CSS with this */
-
 .product-image-container {
   position: relative;
-  height: 250px; /* Slightly taller looks better for edge-to-edge */
+  height: 250px; 
   width: 100%;
   background-color: #f9f9f9;
-  /* Removed padding so it goes all the way to the edges! */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -454,9 +480,7 @@ body {
 .product-image-container img {
   width: 100%;
   height: 100%;
-  /* 'cover' forces the image to fill the entire box without stretching */
   object-fit: cover; 
-  /* 'object-position' centers the most important part of the image */
   object-position: center; 
 }
 
@@ -494,7 +518,6 @@ body {
   font-size: 14px;
   color: var(--text-muted);
   margin-bottom: 6px;
-  /* This truncates long text with an ellipsis (...) */
   display: -webkit-box;
   -webkit-line-clamp: 1; 
   -webkit-box-orient: vertical;
@@ -532,7 +555,7 @@ body {
   margin-top: auto;
   width: 100%;
   padding: 10px;
-  background-color: #ff9f00; /* Flipkart Orange/Yellow */
+  background-color: #ff9f00; 
   color: white;
   border: none;
   border-radius: 4px;
@@ -550,11 +573,10 @@ body {
   cursor: not-allowed;
 }
 
-
 /* --- NEW "DETAILS OUTSIDE" LAYOUT --- */
 .product-grid-4 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Enforces 4 columns */
+  grid-template-columns: repeat(4, 1fr); 
   margin: 60px;
   justify-content:space-around;
   gap: 20px;
@@ -569,14 +591,13 @@ body {
 .product-outer-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Space between image and details */
+  gap: 12px; 
   height: 100%;
 }
 
-/* The Image acts as the only "card" now */
 .product-image-box {
   position: relative;
-  height: 350px; /* INCREASED HEIGHT */
+  height: 350px; 
   width: 100%;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -593,10 +614,9 @@ body {
 }
 
 .product-image-box:hover img {
-  transform: scale(1.04); /* Slight zoom effect on hover */
+  transform: scale(1.04); 
 }
 
-/* Text and Buttons placed outside */
 .product-info-outside {
   display: flex;
   flex-direction: column;
@@ -604,24 +624,6 @@ body {
   padding: 0 4px; 
 }
 
-.product-title-row {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* Allow 2 lines for title outside */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.product-title-row strong {
-  color: var(--text-main);
-  font-weight: 600;
-  margin-right: 5px;
-}
-
-/* Rating badge moved to standard text outside */
 .rating-text {
   display: flex;
   align-items: center;
@@ -632,64 +634,17 @@ body {
   margin-bottom: 8px;
 }
 
-.product-price-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.price-original {
-  text-decoration: line-through;
-  color: #878787;
-  font-size: 14px;
-}
-
-.price-current {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.add-to-cart-modern {
-  margin-top: auto;
-  width: 100%;
-  padding: 10px;
-  background-color: #ff9f00; 
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.add-to-cart-modern:hover {
-  background-color: #f39800;
-}
-
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background-color: var(--bg-color, #ffffff); /* Ensure it's not transparent */
-}
-
 .fk-categories-wrapper {
   display: flex;
   justify-content: center;
-  gap: 30px; /* Adjust gap to keep them centered and tight */
+  gap: 30px; 
 }
 
 .fk-category-item {
-  padding: 5px 10px; /* Reduced vertical padding */
+  padding: 5px 10px; 
   font-size: 12px;
 }
 
-.product-image-box {
-  position: relative; 
-}
-/* The button MUST be absolute with a high z-index */
 .wishlist-btn {
   position: absolute;
   top: 10px;
@@ -706,7 +661,7 @@ body {
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   font-size: 28px;
-  color: #ccc; /* Default empty heart color */
+  color: #ccc; 
   transition: all 0.2s;
 }
 
@@ -715,6 +670,101 @@ body {
 }
 .wishlist-btn.favorited {
   color: #f70d20; 
-    border: none;
+  border: none;
   border-radius: 50%;
+}
+
+/* =========================================================
+   --- 7. MOBILE RESPONSIVENESS (SMARTPHONES & TABLETS) ---
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* 1. Fix the Product Grid Margins */
+  .product-grid-4 {
+    /* Remove the giant 60px margin on mobile, keep it tight to the edges */
+    margin: 20px 10px; 
+    gap: 15px;
+  }
+
+  /* 2. Make the Banner Smartphone-Friendly */
+  .banner-container {
+    height: 250px; /* Shorter height so it doesn't take up the whole screen */
+    margin-bottom: 15px;
+  }
+  
+  .banner-content {
+    padding: 15px;
+    max-width: 90%;
+  }
+
+  .banner-content h2 {
+    font-size: 1.5rem; /* Smaller heading */
+    margin-bottom: 5px;
+  }
+
+  .banner-content p {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  /* 3. Horizontal Scrolling for Categories (Like Native Apps) */
+  .fk-categories-wrapper {
+    justify-content: flex-start; /* Align left instead of center */
+    gap: 15px;
+    padding: 10px;
+    overflow-x: auto; /* Allow users to swipe left/right */
+    white-space: nowrap; /* Prevent stacking */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+
+  /* Hide the ugly scrollbar on the categories menu */
+  .fk-categories-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .fk-categories-wrapper {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* 4. Compact Navigation & Search */
+  .navbar {
+    padding: 10px 15px;
+    flex-wrap: wrap; /* Allow elements to stack if needed */
+    gap: 10px;
+  }
+
+  .nav-links {
+    display: none; /* Hide text links on mobile to save space */
+  }
+
+  .search-container {
+    margin: 0;
+    max-width: 100%;
+    order: 3; /* Push search bar below the logo on very small screens */
+  }
+
+  /* 5. Adjust Product Cards */
+  .product-image-box {
+    height: 220px; /* Slightly shorter images on mobile */
+  }
+  
+  .product-title-row {
+    font-size: 13px;
+  }
+  
+  .price-current {
+    font-size: 15px;
+  }
+}
+
+/* Extra small devices (Phones under 400px wide) */
+@media (max-width: 480px) {
+  .product-image-box {
+    height: 280px; /* Taller again since it drops to 1 column */
+  }
+  
+  .banner-container {
+    height: 200px;
+  }
 }

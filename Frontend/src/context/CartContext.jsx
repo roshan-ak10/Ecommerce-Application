@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
@@ -8,28 +9,22 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
+
+  const { user, isLoading } = useAuth();
+
   const [buyNowItem, setBuyNowItem] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
-  const [currentUser, setCurrentUser] = useState(localStorage.getItem('userEmail'));
 
-  // --- 0. LISTEN FOR LOGIN/LOGOUT EVENTS ---
-  useEffect(() => {
-    const syncUser = () => setCurrentUser(localStorage.getItem('userEmail'));
-    window.addEventListener('storage', syncUser);    
-    window.addEventListener('userChanged', syncUser); 
-    return () => {
-      window.removeEventListener('storage', syncUser);
-      window.removeEventListener('userChanged', syncUser);
-    };
-  }, []);
 
   // --- 1. FETCH CART FROM DATABASE ---
   useEffect(() => {
+
+    if (isLoading) return;
     let cancelled = false;
 
     const fetchCart = async () => {
-      if (!currentUser) {
+      if (!user) {
         if (!cancelled) {
           setCartItems([]);
           setIsCartLoaded(false);
@@ -42,7 +37,7 @@ export const CartProvider = ({ children }) => {
 
         // ADDED: withCredentials is REQUIRED for secure cookies!
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/cart/${encodeURIComponent(currentUser)}`,
+          `${import.meta.env.VITE_API_URL}/api/cart/me`,
           { withCredentials: true } 
         );
 
@@ -61,17 +56,17 @@ export const CartProvider = ({ children }) => {
 
     fetchCart();
     return () => { cancelled = true; };
-  }, [currentUser]);
+  }, [user]);
 
   // --- 2. SYNC CART TO DATABASE ---
   useEffect(() => {
-    if (!isCartLoaded || !currentUser) return;
+    if (!isCartLoaded || !user) return;
 
     const syncCartToDB = async () => {
       try {
         // ADDED: withCredentials is REQUIRED for secure cookies!
         await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/sync`, {
-          email: currentUser, 
+          
           items: cartItems
         }, { 
           withCredentials: true 
@@ -87,11 +82,19 @@ export const CartProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [cartItems, currentUser, isCartLoaded]);
+  }, [cartItems, user, isCartLoaded]);
 
   // --- CART FUNCTIONS ---
   const addToCart = (product) => {
-    if (!currentUser) {
+    // 1. If the app is STILL checking the backend, do nothing (or show a warning)
+    if (isLoading) {
+      console.log("Hold on, still verifying user...");
+      return; 
+    }
+
+    // 2. If it finished checking and you STILL aren't logged in, then redirect
+    if (!user) {
+      console.log("User is genuinely not logged in. Redirecting...");
       window.location.href = '/login'; 
       return;
     }
@@ -127,6 +130,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={{
       cartItems,
+      setCartItems,
       addToCart,
       buyNowItem,
       setBuyNowItem,

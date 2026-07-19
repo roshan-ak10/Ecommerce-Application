@@ -6,14 +6,23 @@ function Coupons() {
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(null);
 
-  useEffect(() => {
-    const fetchCoupons = async () => {
-      try {
-        const response = await axios.get('${import.meta.env.VITE_API_URL}/api/coupons/active');
-        setCoupons(response.data);
-      } catch (error) {
-        console.error("Error fetching coupons:", error);
-      } finally {
+useEffect(() => {
+  const fetchCoupons = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/coupons/active`);
+
+      console.log("Backend response:", response.data);
+
+
+      if (response.data.coupons) {
+        setCoupons(response.data.coupons); 
+      } else {
+        setCoupons(response.data); 
+      }
+
+    } catch (error) {
+      console.error("Error fetching coupons", error);
+    } finally {
         setLoading(false);
       }
     };
@@ -33,19 +42,19 @@ function Coupons() {
       {loading ? (
         <p style={{ textAlign: 'center' }}>Loading latest deals...</p>
       ) : coupons.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+        <div style={{ textAlign: 'center', padding: '40px', background: 'var(--bg-color)', borderRadius: '8px' }}>
           <p>No active coupons at the moment. Check back later!</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-          {coupons.map((coupon) => (
+          {Array.isArray(coupons) && coupons.map((coupon) => (
             <div 
               key={coupon._id} 
               style={{ 
                 border: '2px dashed #ff9f00', 
                 borderRadius: '8px', 
                 padding: '20px', 
-                backgroundColor: 'var(--bg-secondary)',
+                backgroundColor: 'var(--bg-color)',
                 textAlign: 'center'
               }}
             >
@@ -60,7 +69,7 @@ function Coupons() {
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center',
-                backgroundColor: 'var(--bg-main)',
+                backgroundColor: 'var(--bg-color)',
                 padding: '10px 15px',
                 borderRadius: '4px',
                 border: '1px solid var(--border-color)'

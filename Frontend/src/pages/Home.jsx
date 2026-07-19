@@ -99,7 +99,7 @@ function Home() {
   });
 
   return (
-    <div style={{ marginTop: '20px' }}>
+    <div>
 
       <div className="sticky-categories-wrapper">
         <Categories 

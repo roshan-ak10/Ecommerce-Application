@@ -7,7 +7,9 @@ const wishlistCtrl = {
   getWishlist: async (req, res) => {
     try {
       // Find the wishlist by the email passed in the URL
-      let wishlist = await Wishlist.findOne({ email: req.params.email });
+      const secureEmail = req.user.email; 
+
+      let wishlist = await Wishlist.findOne({ email: secureEmail });
       
       // If they don't have a wishlist yet, return an empty array
       if (!wishlist) {
@@ -23,17 +25,19 @@ const wishlistCtrl = {
 
   // 2. SYNC WISHLIST
   syncWishlist: async (req, res) => {
-    const { email, items } = req.body;
+    const { items } = req.body;
+          const secureEmail = req.user.email; 
+
 
     try {
-      let wishlist = await Wishlist.findOne({ email });
+      let wishlist = await Wishlist.findOne({ email:secureEmail });
 
       // If the wishlist exists, update the items. Otherwise, create a new one.
       if (wishlist) {
         wishlist.items = items;
         await wishlist.save();
       } else {
-        wishlist = new Wishlist({ email, items });
+        wishlist = new Wishlist({ email:secureEmail , items });
         await wishlist.save();
       }
 

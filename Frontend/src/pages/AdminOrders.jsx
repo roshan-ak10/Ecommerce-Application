@@ -56,9 +56,9 @@ function AdminOrders() {
         <p>No orders in the system yet.</p>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px', backgroundColor: 'var(--bg-color)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <thead>
-              <tr style={{ backgroundColor: '#f4f4f4', textAlign: 'left' }}>
+              <tr style={{ backgroundColor: 'var(--bg-color)', textAlign: 'left' }}>
                 <th style={{ padding: '15px 12px', borderBottom: '2px solid #ddd' }}>Order ID</th>
                 <th style={{ padding: '15px 12px', borderBottom: '2px solid #ddd' }}>Customer Email</th>
                 {/* NEW UTR COLUMN */}
@@ -106,7 +106,7 @@ function AdminOrders() {
                         borderRadius: '4px', 
                         border: '1px solid #ccc', 
                         cursor: 'pointer',
-                        backgroundColor: '#f9f9f9',
+                        backgroundColor: 'var(--bg-color)',
                         outline: 'none'
                       }}
                     >

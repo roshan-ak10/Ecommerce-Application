@@ -14,11 +14,13 @@ const generateToken = (id, email) => {
 
 // --- USER CONTROLLER ---
 const userCtrl = {
+
   
   // 1. REGISTER NEW USER
   registerUser: async (req, res) => {
+    const isProduction = process.env.NODE_ENV === 'production';
     try {
-      const { name, email, password } = req.body;
+      const { email,name, password } = req.body;
 
       if (!name || !email || !password) return res.status(400).json({ message: "Please provide all required fields." });
       if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters long." });
@@ -36,8 +38,8 @@ const userCtrl = {
 
       res.cookie('token', token, {
         httpOnly: true, 
-        secure: true, 
-        sameSite: 'none', 
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax', 
         maxAge: 7 * 24 * 60 * 60 * 1000 
       });
 
@@ -51,8 +53,11 @@ const userCtrl = {
 
   // 2. LOGIN EXISTING USER
   loginUser: async (req, res) => {
+        const isProduction = process.env.NODE_ENV === 'production';
+
     try {
-      const { email, password } = req.body;
+      const { email,password } = req.body;
+
 
       if (!email || !password) return res.status(400).json({ message: "Please provide both email and password." });
 
@@ -67,8 +72,8 @@ const userCtrl = {
 
       res.cookie('token', token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
@@ -79,29 +84,24 @@ const userCtrl = {
       res.status(500).json({ message: "An unexpected server error occurred." }); 
     }
   },
-
-  // GET USER PROFILE
-  getUserProfile: async (req, res) => {
-    try {
-      // Find the user by the email passed in the URL
-      const user = await User.findOne({ email: req.params.email });
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Send back the user's data (including their addresses)
-      res.status(200).json(user);
-    } catch (error) {
-      console.error("Fetch profile error:", error);
-      res.status(500).json({ message: "Server error fetching profile" });
-    }
-  },
+// userCtrl.js
+getProfile: async (req, res) => {
+  try {
+    // req.user comes from the verified JWT via `authenticate`, NOT the URL
+    const user = await User.findOne({ email: req.user.email }).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error fetching profile" });
+  }
+},
 
   // 3. LOGOUT USER
   logoutUser: (req, res) => {
     res.cookie('token', '', {
       httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       expires: new Date(0) 
     });
     res.status(200).json({ message: "Logged out successfully" });
@@ -110,10 +110,12 @@ const userCtrl = {
   // 4. ADD NEW ADDRESS
   addAddress: async (req, res) => {
     try {
-      const { email, address } = req.body;
+      const { address } = req.body;
+            const secureEmail=req.user.email;
+
 
       // Find the user by their unique email
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email:secureEmail });
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -140,11 +142,13 @@ const userCtrl = {
   // 5. EDIT ADDRESS
   editAddress: async (req, res) => {
     try {
-      const { email, addressId, updatedAddress } = req.body;
+      const { addressId, updatedAddress } = req.body;
+            const secureEmail=req.user.email;
+
 
       // Find the user AND the specific address, then update it using the $ positional operator
       const user = await User.findOneAndUpdate(
-        { email: email, "addresses._id": addressId },
+        { email: secureEmail, "addresses._id": addressId },
         { $set: { "addresses.$": { ...updatedAddress, _id: addressId } } },
         { new: true } // Returns the updated document
       );
@@ -167,11 +171,13 @@ const userCtrl = {
   deleteAddress: async (req, res) => {
     try {
       // We grab these from the URL parameters instead of the body for a DELETE request
-      const { email, addressId } = req.params;
+      const { addressId } = req.params;
+            const secureEmail=req.user.email;
+
 
       // Find the user and $pull (remove) the specific address from the array
       const user = await User.findOneAndUpdate(
-        { email: email },
+        { email: secureEmail },
         { $pull: { addresses: { _id: addressId } } },
         { new: true }
       );

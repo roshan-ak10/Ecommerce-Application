@@ -8,7 +8,9 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
   const userEmail = localStorage.getItem('userEmail');
   const userName = localStorage.getItem('userName');
 
-  const isAdmin = userEmail === "roshankrishnaraj10@gmail.com";
+const isAdmin =
+  userEmail === "roshankrishnaraj10@gmail.com" ||
+  userEmail === "varshiniilango08@gmail.com";  
   const { cartItems } = useCart();
   const navigate = useNavigate();
 
@@ -63,7 +65,7 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
 
         {isAdmin && (
           <li>
-            <Link to="/admin/orders" className="nav-link" style={{ color: '#d32f2f', fontWeight: 'bold' }}>
+            <Link to="/admin" className="nav-link" style={{ color: '#d32f2f', fontWeight: 'bold' }}>
               AdminPage
             </Link>
           </li>
@@ -97,11 +99,11 @@ function Navbar({ setIsMenuOpen , theme, toggleTheme}) {
           </li>
         )}
 
-        <li>
+        {/* <li>
           <button onClick={toggleTheme} className="theme-toggle-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px' }}>
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-        </li>
+        </li> */}
       </ul>
     </nav>
   );

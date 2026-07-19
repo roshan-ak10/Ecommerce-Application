@@ -1,67 +1,66 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const WishlistContext = createContext();
 
 export const useWishlist = () => useContext(WishlistContext);
 
 export const WishlistProvider = ({ children }) => {
+  const { user, isLoading } = useAuth();
   const [wishlistItems, setWishlistItems] = useState([]);
   const [isWishlistLoaded, setIsWishlistLoaded] = useState(false);
-  const [currentUser, setCurrentUser] = useState(localStorage.getItem('userEmail'));
-
-  // Sync user from storage
-  useEffect(() => {
-    const syncUser = () => setCurrentUser(localStorage.getItem('userEmail'));
-    window.addEventListener('storage', syncUser);
-    window.addEventListener('userChanged', syncUser);
-    return () => {
-      window.removeEventListener('storage', syncUser);
-      window.removeEventListener('userChanged', syncUser);
-    };
-  }, []);
 
   // 1. FETCH FROM DB
   useEffect(() => {
+    if (isLoading) return;
     let cancelled = false;
     const fetchWishlist = async () => {
-      if (!currentUser) {
-        setWishlistItems([]);
-        setIsWishlistLoaded(false);
+      if (!user) {
+        if (!cancelled) {
+          setWishlistItems([]);
+          setIsWishlistLoaded(false);
+        }
         return;
       }
       try {
         setIsWishlistLoaded(false);
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/wishlist/${encodeURIComponent(currentUser)}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/wishlist/me`,
+          { withCredentials: true }
+        );
         if (!cancelled) {
           setWishlistItems(response.data?.items || []);
           setIsWishlistLoaded(true);
         }
       } catch (error) {
-        console.error("Failed to fetch wishlist", error);
-        setIsWishlistLoaded(true);
+        if (!cancelled) {
+          console.error("Failed to fetch wishlist", error);
+          setIsWishlistLoaded(true);
+        }
       }
     };
     fetchWishlist();
     return () => { cancelled = true; };
-  }, [currentUser]);
+  }, [user, isLoading]);
 
   // 2. SYNC TO DB
   useEffect(() => {
-    if (!isWishlistLoaded || !currentUser) return;
+    if (!isWishlistLoaded || !user) return;
 
     const syncWishlistToDB = async () => {
       try {
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/wishlist/sync`, {
-          email: currentUser,
-          items: wishlistItems
-        });
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/api/wishlist/sync`,
+          { items: wishlistItems },
+          { withCredentials: true }
+        );
       } catch (error) {
         console.error("Failed to sync wishlist", error);
       }
     };
     syncWishlistToDB();
-  }, [wishlistItems, currentUser, isWishlistLoaded]);
+  }, [wishlistItems, user, isWishlistLoaded]);
 
   // 3. HELPER FUNCTIONS
   const isFavorited = (productId) => {
@@ -69,14 +68,14 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const toggleWishlist = (product) => {
-    if (!currentUser) {
+    if (!user) {
       alert("Please login to save items to your wishlist!");
       return;
     }
     setWishlistItems((prevItems) => {
       const exists = prevItems.find(item => item._id === product._id);
-      return exists 
-        ? prevItems.filter(item => item._id !== product._id) 
+      return exists
+        ? prevItems.filter(item => item._id !== product._id)
         : [...prevItems, { _id: product._id, name: product.name, price: product.price, image: product.image }];
     });
   };

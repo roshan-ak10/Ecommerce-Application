@@ -18,6 +18,7 @@ import Coupons from './pages/Coupon';
 import Collection from './pages/Collection';
 import UserOrders from './pages/UserOrders';
 import AdminOrders from './pages/AdminOrders';
+import { useAuth } from './context/AuthContext';
 
 function AppLayout() {
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
@@ -25,9 +26,25 @@ function AppLayout() {
   const [expandedSection, setExpandedSection] = useState(null);
   
   // --- AUTHENTICATION STATE ---
-  const [authUser, setAuthUser] = useState(localStorage.getItem('userName')); 
-  
+const { user, setUser } = useAuth();  
+
   const navigate = useNavigate();
+
+  const AdminRoute = ({ children }) => {
+  const { user, isLoading } = useAuth();
+  
+  // Define your exact admin emails here again
+  const adminEmails = ["roshankrishnaraj10@gmail.com", "varshiniilango08@gmail.com"];
+
+  if (isLoading) return <div>Loading secure environment...</div>;
+
+  // If there's no verified user, or their verified email isn't on the list, kick them to home!
+  if (!user || !adminEmails.includes(user.email)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -47,16 +64,24 @@ function AppLayout() {
     navigate(path);
   };
 
-  const handleLogout = async () => {
+const handleLogout = async () => {
     try {
+      // 1. Tell the backend to destroy the secure cookie
       await axios.post(`${import.meta.env.VITE_API_URL}/api/users/logout`, {}, { withCredentials: true });
+    } catch (error) {
+      console.error("Backend logout issue (you might already be logged out):", error);
+    } finally {
+      // 2. ALWAYS run this frontend cleanup, even if the backend request above failed
       localStorage.removeItem('userName');
       localStorage.removeItem('userEmail');
-      setAuthUser(null);
-      setIsMenuOpen(false);
-      navigate('/');
-    } catch (error) {
-      console.error("Logout failed:", error);
+      
+      // Make sure you are using setUser from your AuthContext!
+      if (typeof setUser === 'function') {
+         setUser(null); 
+      }
+      
+      setIsMenuOpen(false); // Close the sidebar
+      navigate('/');        
     }
   };
 
@@ -73,14 +98,47 @@ function AppLayout() {
       <div className={`overlay ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(false)}></div>
       
       <div className={`side-menu ${isMenuOpen ? 'open' : ''}`}>
-        <div className="menu-header">
-          <h2>Menu</h2>
-          <button className="icon-btn" onClick={() => setIsMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 'bold' }}>
-            X
-          </button>
+        
+        {/* --- User Profile Header --- */}
+        <div style={{ 
+          backgroundColor: 'var(--primary-red)', 
+          margin: '-20px -20px 20px -20px', 
+          padding: '30px 20px 20px 20px',
+          color: 'white'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '20px', textTransform: 'capitalize' }}>
+                {user ? `Hello, ${user.name || 'User'}!` : 'Welcome, Guest'} 
+              </h2>
+              {user && <p style={{ margin: 0, fontSize: '12px', opacity: 0.8 }}>{user.email}</p>}
+            </div>
+            <button className="icon-btn" onClick={() => setIsMenuOpen(false)} style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>
+              ✕
+            </button>
+          </div>
         </div>
         
         <ul className="menu-list">
+          <li onClick={() => handleNavigation('/')}>Home</li>
+          
+          {/* --- NEW: Added Account Link --- */}
+          {user && <li onClick={() => handleNavigation('/profile')}>My Account</li>}
+          
+          <li onClick={() => handleNavigation('/cart')}>Cart</li>
+          <li onClick={() => handleNavigation('/wishlist')}>Wishlist</li>
+          {user && <li onClick={() => handleNavigation('/orders')}>My Orders</li>}
+          
+          {/* Show Admin Panel link only if they are an admin */}
+          {user && ["roshankrishnaraj10@gmail.com", "varshiniilango08@gmail.com"].includes(user.email) && (
+            <li onClick={() => handleNavigation('/admin')} style={{ color: 'var(--primary-red)' }}>
+              Admin Panel
+            </li>
+          )}
+
+          <hr style={{ border: '0', borderTop: '1px solid var(--border-color)', margin: '10px 0' }} />
+
+          {/* --- Filters Accordion --- */}
           <li className="menu-item-container">
             <div className="menu-item-header" onClick={() => handleAccordion('filters')}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>Filters</span>
@@ -100,11 +158,16 @@ function AppLayout() {
             )}
           </li>
 
-          <li>Settings</li>
+          {/* --- Theme Toggle ---
+          <li onClick={toggleTheme} style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <span>🌗 Theme</span>
+            <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{theme === 'light' ? 'Light' : 'Dark'}</span>
+          </li> */}
+          
           <li onClick={() => handleNavigation('/help')}>Help & Support</li>
           
-          {/* --- SIDE MENU LOGIN/LOGOUT BUTTON --- */}
-          {authUser ? (
+          {/* --- Login/Logout --- */}
+          {user ? (
             <li onClick={handleLogout} style={{ borderTop: '1px solid var(--border-color)', paddingTop: '15px', marginTop: '10px', color: 'var(--primary-red)', fontWeight: 'bold', cursor: 'pointer' }}>
               Logout
             </li>
@@ -132,19 +195,12 @@ function AppLayout() {
           <Route path="/orders" element={<UserOrders />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           
-          <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
+          <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/collection/:categoryName" element={<Collection />} />
           <Route path="/admin" element={
-            ['roshankrishnaraj10@gmail.com', 'varshiniilango08@gmail.com'].includes(localStorage.getItem('userEmail')) ? (
-              <Admin />
-            ) : (
-              <div style={{ textAlign: 'center', marginTop: '50px', color: 'var(--text-main)' }}>
-                <h1>403 - Access Denied</h1>
-                <p>You are not authorized to view this page.</p>
-                <br></br>
-                <Link to="/" className="btn-primary" style={{ padding: '10px 20px' }}>Return Home</Link>
-              </div>
-            )
+            <AdminRoute>
+            <Admin />
+            </AdminRoute>
           } />
         </Routes>
       </main>
