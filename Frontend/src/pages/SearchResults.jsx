@@ -30,6 +30,9 @@ function SearchResults() {
   const [maxPrice, setMaxPrice] = useState(100000);
   const [highestPriceLimit, setHighestPriceLimit] = useState(100000);
 
+  // --- NEW: Mobile Drawer State ---
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
   // 1. FETCH ALL PRODUCTS
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,15 +53,9 @@ function SearchResults() {
     if (!field || !query) return false;
     const text = field.toLowerCase();
     const search = query.toLowerCase().trim();
-
     if (text.includes(search)) return true;
-
-    if (search.endsWith('s') && text.includes(search.slice(0, -1))) {
-      return true;
-    }
-
+    if (search.endsWith('s') && text.includes(search.slice(0, -1))) return true;
     const searchWords = search.split(/[ ,]+/); 
-    
     return searchWords.some(word => {
       if (word.length < 3) return false; 
       return text.includes(word) || (word.endsWith('s') && text.includes(word.slice(0, -1)));
@@ -68,15 +65,12 @@ function SearchResults() {
   // 2. APPLY SEARCH & EXTRACT BRANDS/PRICES
   useEffect(() => {
     if (products.length === 0) return;
-
     const searchResults = products.filter((product) => {
       if (!searchTerm) return false; 
-      
       const matchName = smartSearch(product.name, searchTerm);
       const matchBrand = smartSearch(product.brand, searchTerm);
       const matchCategory = smartSearch(product.category, searchTerm);
       const matchType = smartSearch(product.type, searchTerm);
-
       return matchName || matchBrand || matchCategory || matchType;
     });
 
@@ -85,13 +79,11 @@ function SearchResults() {
     if (searchResults.length > 0) {
       const uniqueBrands = [...new Set(searchResults.map(p => p.brand).filter(Boolean))];
       setAvailableBrands(uniqueBrands);
-
       const highestPrice = Math.max(...searchResults.map(p => p.price));
       setHighestPriceLimit(highestPrice);
     }
   }, [products, searchTerm]);
 
-  // Reset filters automatically if the user types a new search
   useEffect(() => {
     setSelectedBrands([]);
     setMaxPrice(highestPriceLimit);
@@ -100,15 +92,10 @@ function SearchResults() {
   // 3. APPLY SIDEBAR FILTERS
   useEffect(() => {
     let result = baseSearchResults;
-
-    // Filter by Brand Checkboxes
     if (selectedBrands.length > 0) {
       result = result.filter(product => selectedBrands.includes(product.brand));
     }
-
-    // Filter by Price
     result = result.filter(product => product.price <= maxPrice);
-
     setFinalFilteredProducts(result);
   }, [baseSearchResults, selectedBrands, maxPrice]);
 
@@ -123,9 +110,30 @@ function SearchResults() {
   return (
     <div className="search-page-layout" style={{ padding: '20px', marginTop: '20px' }}>
       
-      {/* --- LEFT SIDEBAR: FILTERS --- */}
-      <aside className="filter-sidebar card">
-        <h3 style={{ marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+      {/* --- NEW: Mobile Filter Toggle Button --- */}
+      <div className="mobile-filter-bar">
+        <button className="mobile-filter-btn" onClick={() => setIsMobileFilterOpen(true)}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Filters
+        </button>
+      </div>
+
+      {/* --- NEW: Dark Overlay for Mobile Drawer --- */}
+      <div className={`filter-overlay ${isMobileFilterOpen ? 'open' : ''}`} onClick={() => setIsMobileFilterOpen(false)}></div>
+
+      {/* --- LEFT SIDEBAR / MOBILE DRAWER --- */}
+      <aside className={`filter-sidebar card ${isMobileFilterOpen ? 'open' : ''}`}>
+        
+        {/* Mobile Header (Only shows on phones) */}
+        <div className="filter-mobile-header">
+          <h3 style={{ margin: 0 }}>Filters</h3>
+          <button className="icon-btn" onClick={() => setIsMobileFilterOpen(false)}>✕</button>
+        </div>
+
+        {/* Desktop Header */}
+        <h3 className="filter-desktop-header" style={{ marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
           Filters
         </h3>
 
@@ -148,24 +156,22 @@ function SearchResults() {
           )}
         </div>
 
-        {/* --- UPGRADED PRICE FILTER SECTION --- */}
+        {/* Price Filter Section */}
         <div className="filter-section" style={{ marginTop: '25px' }}>
           <h4 style={{ marginBottom: '15px', color: 'var(--text-main)' }}>Max Price</h4>
           
-          {/* 1. The Manual Typing Bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
             <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-muted)' }}>₹</span>
             <input 
               type="number" 
               className="auth-input"
-              value={maxPrice === 0 ? '' : maxPrice} // Clears the box if they delete the number
+              value={maxPrice === 0 ? '' : maxPrice} 
               onChange={(e) => setMaxPrice(Number(e.target.value) || 0)}
               style={{ width: '100%', padding: '8px' }}
               placeholder="Enter price..."
             />
           </div>
 
-          {/* 2. The Slider (Syncs perfectly with the typing bar) */}
           <input 
             type="range" 
             min="0" 
@@ -179,6 +185,13 @@ function SearchResults() {
             <span>₹0</span>
             <span>₹{highestPriceLimit.toLocaleString('en-IN')}</span>
           </div>
+        </div>
+
+        {/* Apply Button (Only shows on phones) */}
+        <div className="filter-mobile-footer">
+          <button className="btn-primary" onClick={() => setIsMobileFilterOpen(false)}>
+            Apply Filters
+          </button>
         </div>
       </aside>
 
@@ -204,37 +217,28 @@ function SearchResults() {
 
                 return (
                   <div key={product._id} className="product-outer-wrapper">
-                    
                     <div className="product-image-box">
                       <img src={product.image} alt={product.name} />
                     </div>
-                    
                     <div className="product-info-outside">
                       <div className="product-title-row">
                         <strong>{product.brand || "Brand"}</strong>
                         {product.name}
                       </div>
-
                       <div className="rating-text">
                          <span style={{ backgroundColor: '#388e3c', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}>
                            {fakeRating} ★
                          </span>
                          <span style={{ color: '#878787', fontSize: '13px' }}>({fakeReviews.toLocaleString('en-IN')})</span>
                       </div>
-                      
                       <div className="product-price-row">
                         <span className="price-original">₹{fakeOriginalPrice.toLocaleString('en-IN')}</span>
                         <span className="price-current">₹{product.price.toLocaleString('en-IN')}</span>
                       </div>
-                      
                       {product.quantity > 0 ? (
-                        <button className="add-to-cart-modern" onClick={() => addToCart(product)}>
-                          Add to Cart
-                        </button>
+                        <button className="add-to-cart-modern" onClick={() => addToCart(product)}>Add to Cart</button>
                       ) : (
-                        <button className="add-to-cart-modern" disabled>
-                          Out of Stock
-                        </button>
+                        <button className="add-to-cart-modern" disabled>Out of Stock</button>
                       )} 
                     </div>
                   </div>
@@ -242,17 +246,8 @@ function SearchResults() {
               })
             ) : (
               <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>
-                <h3 style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
-                  No products match your current filters.
-                </h3>
-                <button 
-                  className="btn-primary" 
-                  style={{ width: 'auto' }} 
-                  onClick={() => {
-                    setSelectedBrands([]);
-                    setMaxPrice(highestPriceLimit);
-                  }}
-                >
+                <h3 style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>No products match your current filters.</h3>
+                <button className="btn-primary" style={{ width: 'auto' }} onClick={() => { setSelectedBrands([]); setMaxPrice(highestPriceLimit); }}>
                   Clear Filters
                 </button>
               </div>

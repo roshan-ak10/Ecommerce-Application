@@ -586,7 +586,7 @@ body {
 /* Responsive adjustments */
 @media (max-width: 1024px) { .product-grid-4 { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 768px) { .product-grid-4 { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .product-grid-4 { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .product-grid-4 { grid-template-columns: repeat(2, 1fr); } }
 
 .product-outer-wrapper {
   display: flex;
@@ -634,16 +634,35 @@ body {
   margin-bottom: 8px;
 }
 
-.fk-categories-wrapper {
-  display: flex;
-  justify-content: center;
-  gap: 30px; 
-}
+/* 3. Wrap Categories & Shrink Icons for Mobile */
+  .fk-categories-wrapper {
+    justify-content: center; 
+    flex-wrap: wrap;         
+    gap: 8px;                
+    padding: 10px 0;
+    
+    /* --- ADD THESE 3 LINES TO FIX THE MISSING FIRST ITEM --- */
+    white-space: normal !important;  /* Overrides desktop nowrap */
+    overflow-x: visible !important;  /* Stops it from hiding items off-screen */
+    margin-left: 0 !important;       /* Prevents negative margins from pushing it left */
+  }
 
-.fk-category-item {
-  padding: 5px 10px; 
-  font-size: 12px;
-}
+  .fk-category-item {
+    padding: 2px 4px; 
+    font-size: 11px;         
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 65px;             
+    text-align: center;
+  }
+
+  .fk-category-item img {
+    width: 40px !important;  
+    height: 40px !important;
+    object-fit: contain;
+    margin-bottom: 4px;      
+  }
 
 .wishlist-btn {
   position: absolute;
@@ -814,3 +833,144 @@ body {
     height: 200px;
   }
 }
+
+
+
+
+
+
+
+/* =========================================================
+   --- SEARCH RESULTS LAYOUT (WITH AMAZON MOBILE FILTER) ---
+   ========================================================= */
+
+.search-page-layout {
+  display: flex;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.filter-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 90px; 
+}
+
+.search-results-main {
+  flex-grow: 1;
+}
+
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+/* Hide Mobile Elements on Desktop */
+.mobile-filter-bar,
+.filter-overlay,
+.filter-mobile-header,
+.filter-mobile-footer {
+  display: none;
+}
+
+/* --- MOBILE RESPONSIVE DRAWER --- */
+@media (max-width: 768px) {
+  .search-page-layout {
+    flex-direction: column;
+  }
+
+  /* Show the "Filters" Toggle Button */
+  .mobile-filter-bar {
+    display: flex;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .mobile-filter-btn {
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  /* Transform Sidebar into a Slide-out Drawer */
+  .filter-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Hidden off-screen by default */
+    width: 300px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 1001;
+    margin: 0;
+    border-radius: 0;
+    overflow-y: auto;
+    transition: left 0.3s ease-in-out;
+  }
+  
+  .filter-sidebar.open {
+    left: 0; /* Slide in when open */
+  }
+
+  /* Dark Overlay Behind Drawer */
+  .filter-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .filter-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Mobile-Specific Header/Footer inside Drawer */
+  .filter-desktop-header {
+    display: none; /* Hide standard desktop title */
+  }
+  
+  .filter-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .filter-mobile-footer {
+    display: block;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+
+
