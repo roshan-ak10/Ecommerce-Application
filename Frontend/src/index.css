@@ -674,9 +674,55 @@ body {
   border-radius: 50%;
 }
 
+
+/* --- SEARCH RESULTS LAYOUT --- */
+.search-page-layout {
+  display: flex;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start; /* Prevents sidebar from stretching full height */
+}
+
+.filter-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 90px; /* Keeps filters visible while scrolling down the products */
+}
+
+.search-results-main {
+  flex-grow: 1;
+}
+
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+
 /* =========================================================
-   --- 7. MOBILE RESPONSIVENESS (SMARTPHONES & TABLETS) ---
-   ========================================================= */
+--- 7. MOBILE RESPONSIVENESS (SMARTPHONES & TABLETS) ---
+========================================================= */
+
+
+
+/* On mobile screens, move the sidebar to the top */
+@media (max-width: 768px) {
+  .search-page-layout {
+    flex-direction: column;
+  }
+  .filter-sidebar {
+    width: 100%;
+    position: relative;
+    top: 0;
+  }
+}
 
 @media (max-width: 768px) {
   /* 1. Fix the Product Grid Margins */

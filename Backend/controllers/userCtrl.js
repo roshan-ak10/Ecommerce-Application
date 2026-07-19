@@ -31,7 +31,6 @@ const userCtrl = {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-
       const newUser = await User.create({ name: name.trim(), email: normalizedEmail, password: hashedPassword });
 
       const token = generateToken(newUser._id, newUser.email);

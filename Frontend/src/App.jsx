@@ -138,25 +138,7 @@ const handleLogout = async () => {
 
           <hr style={{ border: '0', borderTop: '1px solid var(--border-color)', margin: '10px 0' }} />
 
-          {/* --- Filters Accordion --- */}
-          <li className="menu-item-container">
-            <div className="menu-item-header" onClick={() => handleAccordion('filters')}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>Filters</span>
-              {expandedSection === 'filters' ? <span>-</span> : <span>+</span>}
-            </div>
-            
-            {expandedSection === 'filters' && (
-              <div className="sub-menu">
-                <p style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>Brand</p>
-                <label><input type="checkbox" /> Asus</label>
-                <label><input type="checkbox" /> Sony</label>
-                <label><input type="checkbox" /> Nike</label>
-                <button className="btn-primary" style={{ marginTop: '15px', padding: '8px' }} onClick={() => setIsMenuOpen(false)}>
-                  Find Products
-                </button>
-              </div>
-            )}
-          </li>
+
 
           {/* --- Theme Toggle ---
           <li onClick={toggleTheme} style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
