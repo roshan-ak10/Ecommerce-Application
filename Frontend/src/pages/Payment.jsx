@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import QRCode from 'react-qr-code'; 
 
 function Payment() {
-  const { cartItems, setCartItems, buyNowItem, setBuyNowItem } = useCart();
+  const { cartItems, setCartItems } = useCart();
   const navigate = useNavigate();
 
   // --- UPI DETAILS ---
   const myUpiId = "roshankrishnaraj10@okicici"; 
   const myStoreName = "RedKart.in";
+
+  // 1. Grab the secret routing data we passed from the Product -> Checkout -> Payment
+  const location = useLocation();
+  const { isBuyNow, buyNowProduct } = location.state || {};
   
   const [couponCode, setCouponCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -22,7 +26,7 @@ function Payment() {
   // New state to hold the address from Step 1
   const [shippingAddress, setShippingAddress] = useState(null);
 
-  // 1. Grab the address from localStorage
+  // Grab the address from localStorage
   useEffect(() => {
     const savedAddress = JSON.parse(localStorage.getItem('userAddress'));
     if (!savedAddress) {
@@ -33,7 +37,9 @@ function Payment() {
     }
   }, [navigate]);
 
-  const activeItems = buyNowItem ? [buyNowItem] : cartItems;
+  // 2. CRITICAL FIX: Decide which items we are buying based on the router state!
+  const activeItems = (isBuyNow && buyNowProduct) ? [buyNowProduct] : cartItems;
+  
   const subtotal = activeItems?.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0) || 0;
   const discountAmount = (subtotal * discountPercent) / 100;
   const finalTotal = subtotal - discountAmount;
@@ -58,7 +64,7 @@ function Payment() {
     }
   };
 
-  // 2. The Final Order Submission
+  // 3. The Final Order Submission
   const handlePayment = async () => {
     if (finalTotal === 0 && activeItems?.length === 0) {
       alert("No items to purchase!");
@@ -78,7 +84,7 @@ function Payment() {
         items: activeItems,
         totalAmount: finalTotal,
         shippingAddress: shippingAddress,
-        utrNumber: utrNumber // Passing the UTR to the backend!
+        utrNumber: utrNumber 
       };
 
       // Send to backend
@@ -90,15 +96,13 @@ function Payment() {
 
       alert(`Order Placed! We will verify UTR: ${utrNumber} and process your order soon.`);
       
-      // Clear the correct cart
-      if (buyNowItem) {
-        setBuyNowItem(null); 
-      } else {
+      // 4. CRITICAL FIX: Only clear the global cart if this is a normal cart checkout!
+      if (!isBuyNow) {
         setCartItems([]); 
       }
       
       // Redirect to the new Amazon-style tracking page
-      navigate('/my-orders'); 
+      navigate('/orders'); 
 
     } catch (error) {
       console.error("Order failed:", error);

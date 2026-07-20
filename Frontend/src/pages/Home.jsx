@@ -20,21 +20,21 @@ const bannerDeals = [
     title: "Summer Tech Sale",
     subtitle: "Up to 40% off on Premium Laptops & Accessories",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOCDBb4pp2_qjuaYT8-w9tQj3OLLWUJuElOJA_ZOS1Jw&s=10",
-    targetCategory: "electronics" // <-- ADDED: Target category for routing
+    targetCategory: "Electronics" // <-- ADDED: Target category for routing
   },
   {
     id: 2,
-    title: "New Audio Gear",
-    subtitle: "Experience crystal clear sound with our new arrivals",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1200&auto=format&fit=crop",
-    targetCategory: "tws" // <-- ADDED: Target category for routing
+    title: "Fashionable Clothes",
+    subtitle: "Purchase a Clothes and Be Fashionable",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPX3qaBmAIWpkImPgtUToy0XLnhlf-08SVsi2t9izRQA&s=10",
+    targetCategory: "Fashion" // <-- ADDED: Target category for routing
   },
   {
     id: 3,
-    title: "Step Up Your Game",
-    subtitle: "Exclusive discounts on top sports footwear brands",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop",
-    targetCategory: "shoes" // <-- ADDED: Target category for routing
+    title: "Let's cook the Food",
+    subtitle: "Exclusive discounts on top Grocery Brand's Product",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5pJMow9x3v2qhtbrtPXz9tnCQjS_WkUwyWFM1PIqu_g&s=10",
+    targetCategory: "Groceries" // <-- ADDED: Target category for routing
   }
 ];
 
@@ -156,7 +156,7 @@ function Home() {
                 const fakeReviews = Math.floor(getStableNumber(product._id || product.name, 100, 5000));
 
                 return (
-                  <div key={product._id} className="product-outer-wrapper">
+                  <div key={product._id}  className="product-outer-wrapper"  onClick={() => navigate(`/product/${product._id}`)}  style={{ cursor: 'pointer' }}>
                     
                     <div className="product-image-box">
                       <img src={product.image} alt={product.name} />

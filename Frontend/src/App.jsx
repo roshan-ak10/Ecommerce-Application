@@ -19,6 +19,7 @@ import Collection from './pages/Collection';
 import UserOrders from './pages/UserOrders';
 import AdminOrders from './pages/AdminOrders';
 import { useAuth } from './context/AuthContext';
+import ProductPage from './pages/ProductPage';
 
 function AppLayout() {
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
@@ -179,6 +180,7 @@ const handleLogout = async () => {
           
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/collection/:categoryName" element={<Collection />} />
+          <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/admin" element={
             <AdminRoute>
             <Admin />

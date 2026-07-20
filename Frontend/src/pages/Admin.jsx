@@ -140,13 +140,13 @@ const handleCouponSubmit = async (e) => {
         
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <li onClick={() => setActiveTab('products')} style={{ padding: '12px 15px', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold', backgroundColor: activeTab === 'products' ? '#e0f0ff' : 'transparent', color: activeTab === 'products' ? '#2874f0' : '#333' }}>
-            📦 Add Products
+            Add Products
           </li>
           <li onClick={() => setActiveTab('coupons')} style={{ padding: '12px 15px', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold', backgroundColor: activeTab === 'coupons' ? '#e0f0ff' : 'transparent', color: activeTab === 'coupons' ? '#2874f0' : '#333' }}>
-            🎟️ Add Coupons
+            Add Coupons
           </li>
           <li onClick={() => setActiveTab('orders')} style={{ padding: '12px 15px', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold', backgroundColor: activeTab === 'orders' ? '#e0f0ff' : 'transparent', color: activeTab === 'orders' ? '#2874f0' : '#333' }}>
-            🚚 Manage Orders
+            Manage Orders
           </li>
         </ul>
       </div>
