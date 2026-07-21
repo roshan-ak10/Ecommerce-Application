@@ -92,6 +92,14 @@ export const CartProvider = ({ children }) => {
       return; 
     }
 
+    const isLoggedIn = localStorage.getItem('userEmail'); 
+
+    if (!isLoggedIn) {
+      alert("Please login to add items to your cart.");
+      window.location.href = '/login'; 
+      return; 
+    }
+
     // 2. If it finished checking and you STILL aren't logged in, then redirect
     if (!user) {
       console.log("User is genuinely not logged in. Redirecting...");
