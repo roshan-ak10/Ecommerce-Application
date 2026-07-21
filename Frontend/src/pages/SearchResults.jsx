@@ -216,7 +216,7 @@ function SearchResults() {
                 const fakeReviews = Math.floor(getStableNumber(product._id || product.name, 100, 5000));
 
                 return (
-                  <div key={product._id} className="product-outer-wrapper">
+                  <div key={product._id} className="product-outer-wrapper" onClick={() => navigate(`/product/${product._id}`)} style={{ cursor: 'pointer' }}>
                     <div className="product-image-box">
                       <img src={product.image} alt={product.name} />
                     </div>
@@ -236,7 +236,9 @@ function SearchResults() {
                         <span className="price-current">₹{product.price.toLocaleString('en-IN')}</span>
                       </div>
                       {product.quantity > 0 ? (
-                        <button className="add-to-cart-modern" onClick={() => addToCart(product)}>Add to Cart</button>
+                        <button className="add-to-cart-modern" onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product)}}>Add to Cart</button>
                       ) : (
                         <button className="add-to-cart-modern" disabled>Out of Stock</button>
                       )} 

@@ -190,15 +190,26 @@ function Home() {
                         <span className="price-current">₹{product.price.toLocaleString('en-IN')}</span>
                       </div>
                       
+                      {/* --- ADD TO CART BUTTON --- */}
                       {product.quantity > 0 ? (
-                        <button className="add-to-cart-modern" onClick={() => addToCart(product)}>
+                        <button 
+                          className="add-to-cart-modern" 
+                          onClick={(e) => {
+                            e.stopPropagation(); // <-- THIS IS THE MAGIC LINE
+                            addToCart(product);
+                          }}
+                        >
                           Add to Cart
                         </button>
                       ) : (
-                        <button className="add-to-cart-modern" disabled>
+                        <button 
+                          className="add-to-cart-modern" 
+                          onClick={(e) => e.stopPropagation()} // <-- Add it here too so disabled buttons don't navigate!
+                          disabled
+                        >
                           Out of Stock
                         </button>
-                      )} 
+                      )}
                     </div>
                   </div>
                 );

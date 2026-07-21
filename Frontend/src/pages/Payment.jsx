@@ -37,8 +37,9 @@ function Payment() {
     }
   }, [navigate]);
 
-  // 2. CRITICAL FIX: Decide which items we are buying based on the router state!
-  const activeItems = (isBuyNow && buyNowProduct) ? [buyNowProduct] : cartItems;
+const activeItems = (isBuyNow && buyNowProduct) 
+    ? [{ ...buyNowProduct, quantity: 1 }] 
+    : cartItems;
   
   const subtotal = activeItems?.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0) || 0;
   const discountAmount = (subtotal * discountPercent) / 100;
